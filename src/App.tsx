@@ -1,29 +1,32 @@
 import { useState, Suspense, useRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
-import { Model } from './components/scene/PandaModel'
+import { TargetPanda } from './components/scene/TargetPanda'
+import { PlayerPanda } from './components/scene/PlayerPanda'
 import { FaceControls } from './components/controls/FaceControls'
-import { SceneDebugController } from './components/debug/SceneDebugController'
 import { ApiTest } from "./dev/ApiTest";
 import Timer from "./components/ui/Timer";
 
 import type { BlendshapeValues } from './types/blendshape'
+import { randomFace, scoreMatch } from './utils/faceUtils'
 import type { AmbientLight, PointLight } from "three";
 
 import "./App.css";
+
 export default function App() {
   const [blendshapes, setBlendshapes] = useState<BlendshapeValues>({} as BlendshapeValues)
-  const [envIntensity, setEnvIntensity] = useState(0.1)
-  const [envBlur, setEnvBlur] = useState(0.7)
-  const [envRotation, setEnvRotation] = useState(-3.1)  // single Y-axis value
-  const [cameraX, setCameraX] = useState(0)
-  const [cameraY, setCameraY] = useState(-2.2)
-  const [cameraZ, setCameraZ] = useState(5.4)
-  const [cameraFov, setCameraFov] = useState(56)
-  const [rotationX, setRotationX] = useState(0.2)
-  const [light1Color, setLight1Color] = useState('#0450d5')
-  const [light2Color, setLight2Color] = useState('#d63404')
-  const [light3Color, setLight3Color] = useState('#ffbd8f')
+  const [target, setTarget] = useState<BlendshapeValues>({} as BlendshapeValues)
+  const [score, setScore] = useState<number | null>(null)
+  // These would normally be passed to SceneDebugController (via leva controls)
+  // For now, use fixed values since debug controller is commented out
+  const envIntensity = 0.1
+  const envBlur = 0.7
+  const envRotation = -3.1
+  const cameraX = 0
+  const cameraY = -2.2
+  const cameraZ = 5.4
+  const cameraFov = 56
+  const rotationX = 0.2
   const ambientLightRef = useRef<AmbientLight>(null!)
   const pointLight1Ref = useRef<PointLight>(null!)
   const pointLight2Ref = useRef<PointLight>(null!)
@@ -40,13 +43,14 @@ export default function App() {
           style={{ width: '100%', height: '100%' }}
           gl={{ antialias: true }}
           dpr={[1, 2]}
-  >
-    
+        >
           <Suspense fallback={null}>
             <ambientLight ref={ambientLightRef} intensity={3} />
-           <pointLight ref={pointLight1Ref} position={[0, 4, -4.5]} intensity={308} />
+            <pointLight ref={pointLight1Ref} position={[0, 4, -4.5]} intensity={308} />
             <pointLight ref={pointLight2Ref} position={[0, -6.5, -8.5]} intensity={378} />
             <pointLight ref={pointLight3Ref} position={[0, 7, 11]} intensity={484} />
+            {/* SceneDebugController commented out — leva dependency issue */}
+            {/*
             <SceneDebugController 
               ambientLightRef={ambientLightRef}
               pointLight1Ref={pointLight1Ref}
@@ -75,12 +79,14 @@ export default function App() {
               light3Color={light3Color}
               setLight3Color={setLight3Color}
             /> 
-            <Model 
-              blendshapes={blendshapes} 
+            */}
+            
+            {/* Main player panda — controlled by drag zones */}
+            <PlayerPanda 
+              values={blendshapes} 
               springConfig={{ stiffness: 100, damping: 12, mass: 1 }}
-              receiveShadow
-              castShadow
             />
+            
             <Environment 
               preset="apartment"
               blur={envBlur} 
@@ -92,13 +98,47 @@ export default function App() {
             />
           </Suspense>
         </Canvas>
+
+        {/* Separate target panda canvas — own little world, square, 50% size */}
+        <div style={{ position: 'absolute', top: 20, right: 20, width: 250, height: 250, border: '3px solid #fff', borderRadius: 8, overflow: 'hidden' }}>
+          <Canvas
+            camera={{ position: [cameraX, cameraY, cameraZ * 0.6], fov: cameraFov, rotation: [rotationX, 0, 0] }}
+            style={{ width: '100%', height: '100%' }}
+            gl={{ antialias: true }}
+            dpr={[1, 2]}
+          >
+            <Suspense fallback={null}>
+              <ambientLight intensity={3} />
+              <pointLight position={[0, 4, -4.5]} intensity={308} />
+              <pointLight position={[0, -6.5, -8.5]} intensity={378} />
+              <pointLight position={[0, 7, 11]} intensity={484} />
+              
+              {/* Target panda in its own scene */}
+              <TargetPanda values={target} />
+              
+              <Environment 
+                preset="apartment"
+                blur={envBlur} 
+                background 
+                resolution={64}  
+                environmentIntensity={envIntensity}
+                environmentRotation={[0, envRotation, 0]}  
+                backgroundRotation={[0, envRotation, 0]}   
+              />
+            </Suspense>
+          </Canvas>
+        </div>
+
+        {/* Drag controls overlay — outside Canvas, inside wrapper for proper positioning */}
         <FaceControls onBlendshapesChange={setBlendshapes} />
 
+        {/* Game UI controls — outside Canvas for visibility */}
+        <div className="game-controls" style={{ position: 'absolute', bottom: 20, left: 20, color: '#fff', zIndex: 10 }}>
+          <button onClick={() => setTarget(randomFace())}>New Target</button>
+          <button onClick={() => setScore(scoreMatch(target, blendshapes))}>Score</button>
+          <div style={{ marginTop: 8 }}>Score: {score ?? '-'}</div>
         </div>
-      {/* </div> */}
+      </div>
     </main>
   )
 }
-
-
-

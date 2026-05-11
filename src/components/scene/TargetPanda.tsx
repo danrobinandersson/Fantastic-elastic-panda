@@ -3,9 +3,9 @@ import * as THREE from 'three'
 import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import type { GLTF } from 'three-stdlib'
-import { stepSpring, useSpringStates } from '../../hooks/useSpring'
-import type { SpringConfig } from '../../hooks/useSpring'
+import type { BlendshapeValues } from '../../types/blendshape'
 import { MORPH_KEYS } from '../../config/morphKeys'
+import { applyConstraints } from '../../utils/constraintUtils'
 
 type GLTFResult = GLTF & {
   nodes: { Panda001: THREE.Mesh; EyeL: THREE.Mesh; EyeR: THREE.Mesh }
@@ -13,34 +13,30 @@ type GLTFResult = GLTF & {
   animations: any[]
 }
 
-interface ModelProps {
-  blendshapes?: Record<string, number>
-  springConfig?: SpringConfig
+interface TargetPandaProps {
+  values?: Record<string, number>
   receiveShadow?: boolean
   castShadow?: boolean
 }
 
-export const Model = React.forwardRef<THREE.Group, ModelProps>((props, ref) => {
-  const { blendshapes = {}, springConfig, ...groupProps } = props
+export const TargetPanda = React.forwardRef<THREE.Group, TargetPandaProps>((props, ref) => {
+  const { values = {}, ...groupProps } = props
   const { nodes, materials } = useGLTF('/panda.glb') as unknown as GLTFResult
   const meshRef = useRef<THREE.Mesh>(null)
-  const springs = useSpringStates(MORPH_KEYS)
 
-  useFrame((_, delta) => {
+  // Update morphTargetInfluences every frame (like PlayerPanda, but without spring)
+  useFrame(() => {
     const mesh = meshRef.current
     if (!mesh?.morphTargetDictionary || !mesh.morphTargetInfluences) return
-
+    
+    // Apply constraints to the values
+    const constrainedValues = { ...values } as BlendshapeValues
+    applyConstraints(constrainedValues)
+    
     for (const key of MORPH_KEYS) {
-      const target = blendshapes[key] ?? 0
-      const current = springs.current[key]
-
-      // Step the spring toward the target value
-      springs.current[key] = stepSpring(current, target, delta, springConfig)
-
-      // Write the animated value to the mesh
       const idx = mesh.morphTargetDictionary[key]
       if (idx !== undefined) {
-        mesh.morphTargetInfluences[idx] = springs.current[key].value
+        mesh.morphTargetInfluences[idx] = constrainedValues[key] ?? 0
       }
     }
   })
@@ -67,5 +63,5 @@ export const Model = React.forwardRef<THREE.Group, ModelProps>((props, ref) => {
   );
 });
 
-Model.displayName = "Model";
-useGLTF.preload("/Panda.glb");
+TargetPanda.displayName = "TargetPanda";
+useGLTF.preload('/panda.glb');

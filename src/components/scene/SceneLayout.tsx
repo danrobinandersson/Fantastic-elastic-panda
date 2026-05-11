@@ -8,7 +8,7 @@
 import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Environment, OrbitControls } from '@react-three/drei'
-import { Model } from './PandaModel'
+import { PlayerPanda } from './PlayerPanda'
 
 export function SceneLayout() {
   return (
@@ -27,7 +27,7 @@ export function SceneLayout() {
           <pointLight position={[-10, -10, -5]} intensity={1} />
 
           {/* 3D Model */}
-          <Model />
+          <PlayerPanda values={{}} />
 
           {/* Environment and reflections */}
           <Environment preset="studio" blur={0.5} background resolution={64} />
