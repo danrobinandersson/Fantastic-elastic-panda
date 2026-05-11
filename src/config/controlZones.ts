@@ -67,14 +67,15 @@ export const CONTROL_ZONES: ControlZone[] = [
     x: { positive: 'R_Cheek_Right', negative: null },
     y: { positive: 'R_Cheek_Up', negative: 'R_Cheek_Down' },
 
-    maxValue: 0.75,
-
+    
     displayOffsetYPositive: 0.05,
     displayOffsetYNegative: 0.15,
     displayOffsetXPositive: 0.25,
-
+    
     dragDistanceX: 80,
     dragDistanceY: 100,
+
+    maxValue: 0.5,
   },
   {
     id: 'l_cheek',
@@ -82,14 +83,15 @@ export const CONTROL_ZONES: ControlZone[] = [
     x: { positive: null, negative: 'L_Cheek_Left' },
     y: { positive: 'L_Cheek_Up', negative: 'L_Cheek_Down' },
 
-    maxValue: 0.75,
-
+    
     displayOffsetYPositive: 0.05,
     displayOffsetYNegative: 0.15,
     displayOffsetXNegative: 0.25,
-
+    
     dragDistanceX: 80,
     dragDistanceY: 100,
+
+    maxValue: 0.5,
   },
   {
     id: 'nose',
@@ -102,6 +104,7 @@ export const CONTROL_ZONES: ControlZone[] = [
 
     dragDistanceX: 100,
     dragDistanceY: 50,
+    maxValue: 0.5,
   },
   {
     id: 'mouth',
@@ -116,5 +119,6 @@ export const CONTROL_ZONES: ControlZone[] = [
 
     dragDistanceX: 50,
     dragDistanceY: 200,
+    maxValue: 0.75,
   },
 ]

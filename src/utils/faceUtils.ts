@@ -10,12 +10,49 @@ import { applyConstraints } from './constraintUtils'
 export function randomFace(): BlendshapeValues {
   const face = {} as BlendshapeValues
 
-  for (const key of CONTROLLABLE_MORPH_KEYS) {
-    const max = getBlendshapeMaxValue(key as keyof BlendshapeValues)
-    face[key as keyof BlendshapeValues] = Math.random() * max
+  const exclusivePairs: [keyof BlendshapeValues, keyof BlendshapeValues][] = [
+    ['Mouth_Up', 'Mouth_Down'],
+    ['Mouth_Left', 'Mouth_Right'],
+
+    ['L_Brow_Up', 'L_Brow_Down'],
+    ['R_Brow_Up', 'R_Brow_Down'],
+    ['L_Brow_Left', 'L_Brow_Right'],
+    ['R_Brow_Left', 'R_Brow_Right'],
+
+    ['L_Cheek_Up', 'L_Cheek_Down'],
+    ['R_Cheek_Up', 'R_Cheek_Down'],
+
+    ['L_Ear_Up', 'L_Ear_Down'],
+    ['R_Ear_Up', 'R_Ear_Down'],
+    ['L_Ear_Left', 'L_Ear_Right'],
+    ['R_Ear_Left', 'R_Ear_Right'],
+
+    ['Nose_Up', 'Nose_Down'],
+    ['Nose_Left', 'Nose_Right'],
+  ]
+
+  const handled = new Set<keyof BlendshapeValues>()
+
+  for (const [a, b] of exclusivePairs) {
+    handled.add(a)
+    handled.add(b)
+
+    const chosen = Math.random() < 0.5 ? a : b
+    const other = chosen === a ? b : a
+
+    face[chosen] = Math.random() * getBlendshapeMaxValue(chosen)
+    face[other] = 0
   }
 
-  // Apply constraints to ensure logically valid face (no contradictions)
+  for (const key of CONTROLLABLE_MORPH_KEYS) {
+    const typedKey = key as keyof BlendshapeValues
+
+    if (handled.has(typedKey)) continue
+
+    const max = getBlendshapeMaxValue(typedKey)
+    face[typedKey] = Math.random() * max
+  }
+
   return applyConstraints(face)
 }
 
