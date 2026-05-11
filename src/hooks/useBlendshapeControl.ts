@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import type { ControlZone, BlendshapeKey, BlendshapeValues } from '../types/blendshape'
 import { CONSTRAINTS } from '../config/controlConstraints'
 
@@ -7,8 +7,15 @@ const DEFAULT_MIN = 0
 const DEFAULT_MAX = 1
 
 export function useBlendshapeControl(
+  blendshapes: BlendshapeValues,
   setBlendshapes: React.Dispatch<React.SetStateAction<BlendshapeValues>>
 ) {
+  const dragStartValuesRef = useRef<BlendshapeValues>({} as BlendshapeValues)
+
+  const startDrag = useCallback(() => {
+    dragStartValuesRef.current = { ...blendshapes }
+  }, [blendshapes])
+
   const applyDrag = useCallback((zone: ControlZone, dx: number, dy: number) => {
     const baseDragRange = zone.sensitivity
       ? DEFAULT_DRAG_RANGE / zone.sensitivity
@@ -22,6 +29,7 @@ export function useBlendshapeControl(
 
     setBlendshapes(prev => {
       const next = { ...prev }
+      const startValues = dragStartValuesRef.current
 
       function applyAxis(
         mapping: ControlZone['x'],
@@ -32,18 +40,28 @@ export function useBlendshapeControl(
         if (!mapping) return
 
         const d = invert ? -delta : delta
-        const raw = Math.abs(d) / dragRange
-        const value = Math.min(max, Math.max(min, raw))
+        const amount = Math.abs(d) / dragRange
 
         if (d > 0) {
-          if (mapping.positive) next[mapping.positive] = value
-          if (mapping.negative) next[mapping.negative] = 0
+          if (mapping.positive) {
+            const start = startValues[mapping.positive] ?? 0
+            next[mapping.positive] = Math.min(max, Math.max(min, start + amount))
+          }
+
+          if (mapping.negative) {
+            const start = startValues[mapping.negative] ?? 0
+            next[mapping.negative] = Math.min(max, Math.max(min, start - amount))
+          }
         } else if (d < 0) {
-          if (mapping.negative) next[mapping.negative] = value
-          if (mapping.positive) next[mapping.positive] = 0
-        } else {
-          if (mapping.positive) next[mapping.positive] = 0
-          if (mapping.negative) next[mapping.negative] = 0
+          if (mapping.negative) {
+            const start = startValues[mapping.negative] ?? 0
+            next[mapping.negative] = Math.min(max, Math.max(min, start + amount))
+          }
+
+          if (mapping.positive) {
+            const start = startValues[mapping.positive] ?? 0
+            next[mapping.positive] = Math.min(max, Math.max(min, start - amount))
+          }
         }
       }
 
@@ -94,5 +112,5 @@ export function useBlendshapeControl(
     })
   }, [setBlendshapes])
 
-  return { applyDrag, resetZone }
+  return { startDrag, applyDrag, resetZone }
 }

@@ -99,6 +99,9 @@ export const CONTROL_ZONES: ControlZone[] = [
 
     displayOffsetYPositive: 0.04,
     displayOffsetYNegative: 0.04,
+
+    dragDistanceX: 100,
+    dragDistanceY: 50,
   },
   {
     id: 'mouth',

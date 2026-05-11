@@ -3,53 +3,66 @@ import type { ControlZone } from '../../types/blendshape'
 
 interface DragZoneProps {
   zone: ControlZone
+  onDragStart?: (zone: ControlZone) => void
   onDrag: (zone: ControlZone, dx: number, dy: number) => void
-  onRelease: (zone: ControlZone) => void
-  /** Position as percentage of container, e.g. { top: '20%', left: '60%' } */
+  onRelease?: (zone: ControlZone) => void
   style?: React.CSSProperties
 }
 
-export function DragZone({ zone, onDrag, onRelease, style }: DragZoneProps) {
+export function DragZone({ zone, onDragStart, onDrag, onRelease, style }: DragZoneProps) {
   const originRef = useRef<{ x: number; y: number } | null>(null)
-
-  // ── Mouse ──────────────────────────────────────────────
 
   function onMouseDown(e: React.MouseEvent) {
     e.preventDefault()
+
     originRef.current = { x: e.clientX, y: e.clientY }
+    onDragStart?.(zone)
+
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mouseup', onMouseUp)
   }
 
   function onMouseMove(e: MouseEvent) {
     if (!originRef.current) return
-    onDrag(zone, e.clientX - originRef.current.x, e.clientY - originRef.current.y)
+
+    onDrag(
+      zone,
+      e.clientX - originRef.current.x,
+      e.clientY - originRef.current.y
+    )
   }
 
   function onMouseUp() {
     originRef.current = null
-    // onRelease(zone)
+    onRelease?.(zone)
+
     window.removeEventListener('mousemove', onMouseMove)
     window.removeEventListener('mouseup', onMouseUp)
   }
 
-  // ── Touch ──────────────────────────────────────────────
-
   function onTouchStart(e: React.TouchEvent) {
     const t = e.touches[0]
+
     originRef.current = { x: t.clientX, y: t.clientY }
+    onDragStart?.(zone)
   }
 
-function onTouchMove(e: React.TouchEvent) {
-  e.preventDefault()
-  if (!originRef.current) return
-  const t = e.touches[0]
-  onDrag(zone, t.clientX - originRef.current.x, t.clientY - originRef.current.y)
-}
+  function onTouchMove(e: React.TouchEvent) {
+    e.preventDefault()
+    if (!originRef.current) return
+
+    const t = e.touches[0]
+
+    onDrag(
+      zone,
+      t.clientX - originRef.current.x,
+      t.clientY - originRef.current.y
+    )
+  }
 
   function onTouchEnd() {
     originRef.current = null
-    onRelease(zone)
+    onRelease?.(zone)
   }
 
   return (
@@ -66,11 +79,8 @@ function onTouchMove(e: React.TouchEvent) {
         height: '1%',
         borderRadius: '50%',
         cursor: 'grab',
-        touchAction: 'none',   // prevents scroll interfering with drag
-        // Invisible by default — no background, no border
-        // Uncomment below to see zones during development:
-        //  background: 'rgba(255,0,0,0.1)',
-        //  border: '5px rgba(14, 135, 234, 0.5) solid',
+        userSelect: 'none',
+        touchAction: 'none',
         ...style,
       }}
       aria-label={`Control ${zone.label}`}

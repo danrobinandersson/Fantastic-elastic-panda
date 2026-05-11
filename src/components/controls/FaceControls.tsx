@@ -19,10 +19,6 @@ const ZONE_POSITIONS: Record<string, React.CSSProperties> = {
   mouth:   { top: '70%', left: '50%' },
 }
 
-/**
- * Max offset as a fraction of the wrapper's dimension.
- * 0.06 = 6% of wrapper width/height — scales with canvas at all sizes.
- */
 const OFFSET_FRACTION = 0.06
 
 export const FaceControls: React.FC<FaceControlsProps> = ({ onBlendshapesChange }) => {
@@ -30,7 +26,7 @@ export const FaceControls: React.FC<FaceControlsProps> = ({ onBlendshapesChange 
   const [wrapperSize, setWrapperSize] = useState({ width: 300, height: 500 })
 
   const wrapperRef = useRef<HTMLDivElement>(null)
-  const { applyDrag } = useBlendshapeControl(setBlendshapes)
+  const { startDrag, applyDrag } = useBlendshapeControl(blendshapes, setBlendshapes)
 
   useEffect(() => {
     const el = wrapperRef.current
@@ -59,32 +55,32 @@ export const FaceControls: React.FC<FaceControlsProps> = ({ onBlendshapesChange 
     let offsetX = 0
     let offsetY = 0
 
-if (zone.x?.positive || zone.x?.negative) {
-  const pos = zone.x.positive ? blendshapes[zone.x.positive] ?? 0 : 0
-  const neg = zone.x.negative ? blendshapes[zone.x.negative] ?? 0 : 0
+    if (zone.x?.positive || zone.x?.negative) {
+      const pos = zone.x.positive ? blendshapes[zone.x.positive] ?? 0 : 0
+      const neg = zone.x.negative ? blendshapes[zone.x.negative] ?? 0 : 0
 
-  const maxPos = wrapperWidth * (zone.displayOffsetXPositive ?? OFFSET_FRACTION)
-  const maxNeg = wrapperWidth * (zone.displayOffsetXNegative ?? OFFSET_FRACTION)
+      const maxPos = wrapperWidth * (zone.displayOffsetXPositive ?? OFFSET_FRACTION)
+      const maxNeg = wrapperWidth * (zone.displayOffsetXNegative ?? OFFSET_FRACTION)
 
-  offsetX = pos * maxPos - neg * maxNeg
-}
+      offsetX = pos * maxPos - neg * maxNeg
+    }
 
- if (zone.y?.positive || zone.y?.negative) {
-  const pos = zone.y.positive ? blendshapes[zone.y.positive] ?? 0 : 0
-  const neg = zone.y.negative ? blendshapes[zone.y.negative] ?? 0 : 0
+    if (zone.y?.positive || zone.y?.negative) {
+      const pos = zone.y.positive ? blendshapes[zone.y.positive] ?? 0 : 0
+      const neg = zone.y.negative ? blendshapes[zone.y.negative] ?? 0 : 0
 
-  const maxPos = wrapperHeight * (zone.displayOffsetYPositive ?? OFFSET_FRACTION)
-  const maxNeg = wrapperHeight * (zone.displayOffsetYNegative ?? OFFSET_FRACTION)
+      const maxPos = wrapperHeight * (zone.displayOffsetYPositive ?? OFFSET_FRACTION)
+      const maxNeg = wrapperHeight * (zone.displayOffsetYNegative ?? OFFSET_FRACTION)
 
-  offsetY = -(pos * maxPos) + (neg * maxNeg)
-}
+      offsetY = -(pos * maxPos) + (neg * maxNeg)
+    }
 
     return {
       ...baseStyle,
       width: `${zoneSize}px`,
       height: `${zoneSize}px`,
       transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`,
-      transition: 'transform 0.0s ease-out',
+      transition: 'transform 0s ease-out',
     }
   }, [blendshapes, wrapperSize])
 
@@ -94,6 +90,7 @@ if (zone.x?.positive || zone.x?.negative) {
         <DragZone
           key={zone.id}
           zone={zone}
+          onDragStart={startDrag}
           onDrag={applyDrag}
           onRelease={() => {}}
           style={{
