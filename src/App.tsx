@@ -4,6 +4,7 @@ import { Environment } from '@react-three/drei'
 import { TargetPanda } from './components/scene/TargetPanda'
 import { PlayerPanda } from './components/scene/PlayerPanda'
 import { FaceControls } from './components/controls/FaceControls'
+import { MorphDebugPanel } from './components/debug/MorphDebugPanel'
 import { ApiTest } from "./dev/ApiTest";
 import Timer from "./components/ui/Timer";
 
@@ -138,6 +139,9 @@ export default function App() {
           <button onClick={() => setScore(scoreMatch(target, blendshapes))}>Score</button>
           <div style={{ marginTop: 8 }}>Score: {score ?? '-'}</div>
         </div>
+
+        {/* Debug panel for morph value comparison */}
+        <MorphDebugPanel target={target} player={blendshapes} score={score} />
       </div>
     </main>
   )

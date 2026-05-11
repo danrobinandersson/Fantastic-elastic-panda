@@ -1,17 +1,38 @@
 import type { BlendshapeValues } from '../types/blendshape'
-import { MORPH_KEYS } from '../config/morphKeys'
+import { CONTROLLABLE_MORPH_KEYS } from '../config/morphKeys'
+import { getBlendshapeMaxValue } from './controlConfig'
+import { applyConstraints } from './constraintUtils'
 
+/**
+ * Generate a random face respecting max values from control zones and all constraints.
+ * Ensures the generated face is logically valid (no mutually exclusive morphs both active).
+ */
 export function randomFace(): BlendshapeValues {
-  const out = {} as BlendshapeValues
-  for (const k of MORPH_KEYS) {
-    out[k] = Math.random()
+  const face = {} as BlendshapeValues
+
+  for (const key of CONTROLLABLE_MORPH_KEYS) {
+    const max = getBlendshapeMaxValue(key as keyof BlendshapeValues)
+    face[key as keyof BlendshapeValues] = Math.random() * max
   }
-  return out
+
+  // Apply constraints to ensure logically valid face (no contradictions)
+  return applyConstraints(face)
 }
 
-export function scoreMatch(target: BlendshapeValues, player: BlendshapeValues) {
-  const keys = Object.keys(target) as Array<keyof BlendshapeValues>
-  const sumError = keys.reduce((s, k) => s + Math.abs((target[k] ?? 0) - (player[k] ?? 0)), 0)
-  const avgError = sumError / keys.length
+/**
+ * Calculate match score between target and player blendshapes.
+ * Only scores controllable blendshapes and normalizes by their max values.
+ */
+export function scoreMatch(target: BlendshapeValues, player: BlendshapeValues): number {
+  let sumError = 0
+
+  for (const key of CONTROLLABLE_MORPH_KEYS) {
+    const max = getBlendshapeMaxValue(key as keyof BlendshapeValues)
+    const targetVal = (target[key as keyof BlendshapeValues] ?? 0) / max
+    const playerVal = (player[key as keyof BlendshapeValues] ?? 0) / max
+    sumError += Math.abs(targetVal - playerVal)
+  }
+
+  const avgError = sumError / CONTROLLABLE_MORPH_KEYS.length
   return Math.max(0, Math.round((1 - avgError) * 100))
 }
