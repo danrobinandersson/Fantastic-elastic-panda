@@ -29,9 +29,9 @@ export default function App() {
   const [cameraFov, setCameraFov] = useState(56)
   const [rotationX, setRotationX] = useState(0.2)
 
-  const [light1Color, setLight1Color] = useState('#ffffff')
-  const [light2Color, setLight2Color] = useState('#ffffff')
-  const [light3Color, setLight3Color] = useState('#ffffff')
+  const [light1Color, setLight1Color] = useState("#0450d5");
+  const [light2Color, setLight2Color] = useState("#d63404");
+  const [light3Color, setLight3Color] = useState("#ffbd8f");
 
   const ambientLightRef = useRef<AmbientLight>(null!)
   const pointLight1Ref = useRef<PointLight>(null!)
