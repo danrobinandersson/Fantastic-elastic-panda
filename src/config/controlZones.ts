@@ -15,8 +15,8 @@ export const CONTROL_ZONES: ControlZone[] = [
     displayOffsetXPositive: 0.3,
 
 
-    dragDistanceX: 100,
-    dragDistanceY: 100,
+    dragDistanceX: 200,
+    dragDistanceY: 200,
 
   },
   {
@@ -32,8 +32,8 @@ export const CONTROL_ZONES: ControlZone[] = [
     displayOffsetXNegative: 0.3,
     displayOffsetXPositive: 0.15,
 
-    dragDistanceX: 100,
-    dragDistanceY: 100,
+    dragDistanceX: 200,
+    dragDistanceY: 200,
   },
   {
     id: 'r_brow',
@@ -46,7 +46,7 @@ export const CONTROL_ZONES: ControlZone[] = [
 
 
     dragDistanceX: 80,
-    dragDistanceY: 50,
+    dragDistanceY: 100,
   },
   {
     id: 'l_brow',
@@ -59,7 +59,7 @@ export const CONTROL_ZONES: ControlZone[] = [
 
 
     dragDistanceX: 80,
-    dragDistanceY: 50,
+    dragDistanceY: 100,
   },
   {
     id: 'r_cheek',
@@ -117,7 +117,7 @@ export const CONTROL_ZONES: ControlZone[] = [
     displayOffsetXNegative: 0.15,
     displayOffsetXPositive: 0.15,
 
-    dragDistanceX: 50,
+    dragDistanceX: 100,
     dragDistanceY: 200,
     maxValue: 0.75,
   },
