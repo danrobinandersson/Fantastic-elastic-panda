@@ -5,14 +5,33 @@ import styles from "./GameResultModal.module.css";
 type GameResultModalProps = {
   score: number | null;
   token: string | null;
+  config: {
+    doubleWinThreshold: number;
+    moneyBackThreshold: number;
+  };
   onExit: () => void;
 };
 
 export default function GameResultModal({
   score,
   token,
+  config,
   onExit,
 }: GameResultModalProps) {
+  function getFeedbackMessage() {
+    if (score === null) return "";
+
+    if (score >= config.doubleWinThreshold) {
+      return "Amazing! Double win!";
+    }
+
+    if (score >= config.moneyBackThreshold) {
+      return "Nice! You got your money back!";
+    }
+
+    return "Sorry no win today, better luck next time!";
+  }
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -38,6 +57,8 @@ export default function GameResultModal({
         <h2 id="game-result-title">Time’s up!</h2>
 
         <p>Your score: {score ?? "-"}</p>
+
+        <p>{getFeedbackMessage()}</p>
 
         {/* Show token if it exists */}
         {token ? (

@@ -13,10 +13,16 @@
 
 .modal {
   background: var(--color-gold-main);
+  border-radius: 30px;
+  padding: 10px;
+  box-sizing: border-box;
+
+  background: linear-gradient(135deg, #777ec0 0%, #4e256c 40%, #9383b2 100%);
+
   color: var(--color-black);
   padding: 2rem;
   border-radius: 1rem;
   text-align: center;
   min-width: 280px;
-  border: 2px solid var(--color-red-shadow);
+  border: 2px solid #4e256c;
 }

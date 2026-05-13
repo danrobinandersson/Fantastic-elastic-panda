@@ -24,6 +24,7 @@ export default function App() {
   const finishGame = useGameStore((state) => state.finishGame);
   const exitGame = useGameStore((state) => state.exitGame);
   const [rewardToken, setRewardToken] = useState<string | null>(null);
+  const config = useGameStore((state) => state.config);
 
   const [blendshapes, setBlendshapes] = useState<BlendshapeValues>(
     {} as BlendshapeValues,
@@ -130,6 +131,7 @@ export default function App() {
         <GameResultModal
           score={score}
           token={rewardToken}
+          config={config}
           onExit={handleExitGame}
         />
       )}
