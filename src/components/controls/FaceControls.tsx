@@ -6,6 +6,7 @@ import type { ControlZone, BlendshapeValues } from '../../types/blendshape'
 
 interface FaceControlsProps {
   onBlendshapesChange?: (blendshapes: BlendshapeValues) => void
+  resetTrigger?: number
 }
 
 const ZONE_POSITIONS: Record<string, React.CSSProperties> = {
@@ -21,24 +22,32 @@ const ZONE_POSITIONS: Record<string, React.CSSProperties> = {
 
 const OFFSET_FRACTION = 0.06
 
-export const FaceControls: React.FC<FaceControlsProps> = ({ onBlendshapesChange }) => {
+export const FaceControls: React.FC<FaceControlsProps> = ({
+  onBlendshapesChange,
+  resetTrigger,
+}) => {
   const [blendshapes, setBlendshapes] = useState<BlendshapeValues>({} as BlendshapeValues)
   const [wrapperSize, setWrapperSize] = useState({ width: 300, height: 500 })
 
   const wrapperRef = useRef<HTMLDivElement>(null)
   const { startDrag, applyDrag } = useBlendshapeControl(blendshapes, setBlendshapes)
 
+  // Reset all internal blendshape state and notify parent
+  useEffect(() => {
+    if (!resetTrigger) return
+    const empty = {} as BlendshapeValues
+    setBlendshapes(empty)
+    onBlendshapesChange?.(empty)
+  }, [resetTrigger])
+
   useEffect(() => {
     const el = wrapperRef.current
     if (!el) return
-
     const observer = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect
       setWrapperSize({ width, height })
     })
-
     observer.observe(el)
-
     return () => observer.disconnect()
   }, [])
 
@@ -58,20 +67,16 @@ export const FaceControls: React.FC<FaceControlsProps> = ({ onBlendshapesChange 
     if (zone.x?.positive || zone.x?.negative) {
       const pos = zone.x.positive ? blendshapes[zone.x.positive] ?? 0 : 0
       const neg = zone.x.negative ? blendshapes[zone.x.negative] ?? 0 : 0
-
       const maxPos = wrapperWidth * (zone.displayOffsetXPositive ?? OFFSET_FRACTION)
       const maxNeg = wrapperWidth * (zone.displayOffsetXNegative ?? OFFSET_FRACTION)
-
       offsetX = pos * maxPos - neg * maxNeg
     }
 
     if (zone.y?.positive || zone.y?.negative) {
       const pos = zone.y.positive ? blendshapes[zone.y.positive] ?? 0 : 0
       const neg = zone.y.negative ? blendshapes[zone.y.negative] ?? 0 : 0
-
       const maxPos = wrapperHeight * (zone.displayOffsetYPositive ?? OFFSET_FRACTION)
       const maxNeg = wrapperHeight * (zone.displayOffsetYNegative ?? OFFSET_FRACTION)
-
       offsetY = -(pos * maxPos) + (neg * maxNeg)
     }
 
