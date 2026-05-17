@@ -10,18 +10,18 @@ interface FaceControlsProps {
 }
 
 const ZONE_POSITIONS = {
-  r_ear:   { top: '45%', left: '80%' },
-  l_ear:   { top: '45%', left: '20%' },
+  r_ear:   { top: '47%', left: '80%' },
+  l_ear:   { top: '47%', left: '20%' },
 
-  r_brow:  { top: '50%', left: '62%' },
-  l_brow:  { top: '50%', left: '38%' },
+  r_brow:  { top: '54%', left: '62%' },
+  l_brow:  { top: '54%', left: '38%' },
 
-  r_cheek: { top: '65%', left: '70%' },
-  l_cheek: { top: '65%', left: '30%' },
+  r_cheek: { top: '68%', left: '70%' },
+  l_cheek: { top: '68%', left: '30%' },
 
-  nose:    { top: '63%', left: '50%' },
+  nose:    { top: '66%', left: '50%' },
 
-  mouth:   { top: '72%', left: '50%' },
+  mouth:   { top: '76%', left: '50%' },
 }
 const OFFSET_FRACTION = 0.06
 
@@ -104,6 +104,7 @@ export const FaceControls: React.FC<FaceControlsProps> = ({
           style={{
             ...getZoneStyle(zone),
             pointerEvents: 'auto',
+            //border: '2px solid rgba(255, 255, 255, 0.8)' //Show zones borders,
           }}
         />
       ))}

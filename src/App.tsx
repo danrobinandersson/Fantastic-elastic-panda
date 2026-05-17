@@ -175,24 +175,26 @@ export default function App() {
               PLAYER PANDA
           ========================= */}
 
-          <div className="panda-stage">
-            <SceneLayout
-              config={sceneConfig}
-              setConfig={setSceneConfig}
-              className="main-canvas"
-              // debug
-            >
-              <PlayerPanda
-                values={blendshapes}
-                springConfig={springConfig}
-              />
-            </SceneLayout>
+<div className="panda-stage">
 
-            <FaceControls
-              onBlendshapesChange={setBlendshapes}
-              resetTrigger={resetTrigger}
-            />
-          </div>
+  <div className="panda-canvas-area">
+    <SceneLayout
+      config={sceneConfig}
+      setConfig={setSceneConfig}
+      className="main-canvas"
+    >
+      <PlayerPanda
+        values={blendshapes}
+        springConfig={springConfig}
+      />
+    </SceneLayout>
+  </div>
+
+  <FaceControls
+    onBlendshapesChange={setBlendshapes}
+    resetTrigger={resetTrigger}
+  />
+</div>
 
           {/* =========================
               UI OVERLAY

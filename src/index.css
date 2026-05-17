@@ -67,19 +67,8 @@ body {
 
   aspect-ratio: 9 / 16;
 
-  /*
-    Instead of forcing full height,
-    use the SMALLER dimension.
-  */
-  width: min(100vw, 56.25vh);
-  height: min(100vh, 177.77vw);
-
-  /*
-    Prevent giant scaling
-    on modern tall phones
-  */
-  max-width: 520px;
-  max-height: 100vh;
+  width: min(100vw, calc(100vh * 9 / 16));
+  height: min(100vh, calc(100vw * 16 / 9));
 
   overflow: hidden;
 
@@ -133,16 +122,23 @@ body {
   inset: 0;
 }
 
+/*
+  ONLY affects the panda render area.
+  Face controls stay full-screen.
+*/
+.panda-canvas-area {
+  position: absolute;
+  inset: 0;
 
+  padding:
+    clamp(34px, 5vw, 54px)
+  clamp(60px, 8vw, 100px)
+    clamp(130px, 18vh, 190px);
 
-@media (max-width: 768px) {
-  .targetWindow {
-    width: clamp(100px, 24vw, 170px);
-
-    top: 3%;
-    right: 3%;
-  }
+  transform: translateY(2%);
 }
+
+
 
 
 
