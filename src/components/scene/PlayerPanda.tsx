@@ -75,6 +75,7 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
         >
           <mesh geometry={nodes.EyeL.geometry} material={materials.Panda} position={[-32, 13.7448, -24.33]} rotation={[Math.PI / 2, 0, 0]} scale={[1, 1, 1]} />
           <mesh geometry={nodes.EyeR.geometry} material={materials.Panda} position={[32, 13.7448, -24.33]} rotation={[Math.PI / 2, 0, 0]} scale={[1, 1, 1]} />
+{/*
 <mesh
   name="Body"
   geometry={nodes.Body.geometry}
@@ -84,7 +85,11 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
   scale={nodes.Body.scale}
   receiveShadow={props.receiveShadow}
   castShadow={props.castShadow}
-/>          </mesh>
+/>         
+
+>*/}
+
+</mesh>
       </group>
     </group>
   );
