@@ -81,6 +81,7 @@ export function DragZone({ zone, onDragStart, onDrag, onRelease, style }: DragZo
         cursor: 'grab',
         userSelect: 'none',
         touchAction: 'none',
+        // border: '2px solid rgba(255, 255, 255, 0.8)', // for debugging
         ...style,
       }}
       aria-label={`Control ${zone.label}`}

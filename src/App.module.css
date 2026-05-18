@@ -1,40 +1,117 @@
 .targetWindow {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 250px;
-  height: 250px;
+
+  top: clamp(14px, 3%, 26px);
+  right: clamp(14px, 3%, 26px);
+
+  /*
+    Better proportional sizing:
+    - larger on desktop
+    - slightly larger on old phones
+    - no giant scaling on narrow devices
+  */
+  width: clamp(138px, min(50vw, 32vh), 380px);
+
+  aspect-ratio: 1 / 1;
+
+  z-index: 30;
 
   border-radius: 30px;
-  padding: 10px;
+
+  padding: clamp(8px, 1.2vw, 14px);
+
   box-sizing: border-box;
 
   background: linear-gradient(
-    135deg,
-    #777ec0 0%,
-    #4e256c 40%,
-    #9383b2 100%
+    180deg,
+    #f78019 10%,
+    #cb5c13 60%,
+    #7a2e0a 90%
   );
 
+  /*
+    Restored chunky border/shadow look
+  */
   box-shadow:
-    0 8px 32px rgba(69, 85, 108, 0.45),
-    0 2px 8px rgba(0, 0, 0, 0.3);
+    inset 1px 0px rgb(207, 101, 8),
+    inset 0px -1px rgb(102, 49, 0),
+    0px 8px rgb(61, 11, 0),
+    0px -2px rgb(255, 164, 80),
+    0 12px 30px rgba(0,0,0,0.28);
+}
+
+.targetCanvasWrapper {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  border-radius: 22px;
+
+  overflow: hidden;
+
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,0.12),
+    inset 0 -4px 8px rgba(0,0,0,0.18);
+}
+
+
+.targetBackground {
+  position: absolute;
+  inset: 0;
+
+  z-index: 0;
+
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      #40226e 20%,
+      #11002c 70%,
+      #0f0024 95%,
+      #000000 100%
+    );
+}
+
+
+
+/*
+  Ensure canvas sits above gradient
+*/
+.targetCanvasWrapper canvas {
+  position: relative;
+  z-index: 1;
+
+  border-radius: inherit;
+}
+
+
+/*
+  Ensure actual canvas
+  respects rounded corners
+*/
+.targetCanvasWrapper canvas {
+  border-radius: inherit;
 }
 
 .windowText {
   position: absolute;
-  top: 15px;
+
+  top: clamp(10px, 1.6vw, 16px);
   left: 0;
   right: 0;
 
   margin: 0;
+
   z-index: 10;
 
   text-align: center;
+
   pointer-events: none;
 
   color: #ffe57e;
-  font-size: 24px;
+
+  font-size: clamp(16px, 2vw, 24px);
+
   font-weight: bold;
 
   text-shadow:
