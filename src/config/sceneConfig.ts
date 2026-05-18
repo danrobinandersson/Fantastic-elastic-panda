@@ -4,7 +4,7 @@ export const defaultSceneConfig = {
 camera: {
     x: 0,
     y: -2.0,
-    z: 5.8,
+    z: 5.4,
     fov: 56,
     rotationX: 0.2,
   },

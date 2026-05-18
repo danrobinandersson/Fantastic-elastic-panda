@@ -1,6 +1,5 @@
-import { useEffect } from "react";
+import Modal from "./Modal";
 import Button from "./Button";
-import styles from "./GameResultModal.module.css";
 
 type GameResultModalProps = {
   score: number | null;
@@ -10,6 +9,7 @@ type GameResultModalProps = {
     moneyBackThreshold: number;
   };
   onExit: () => void;
+  onShowHighScores: () => void;
 };
 
 export default function GameResultModal({
@@ -17,59 +17,29 @@ export default function GameResultModal({
   token,
   config,
   onExit,
+  onShowHighScores,
 }: GameResultModalProps) {
   function getFeedbackMessage() {
     if (score === null) return "";
-
-    if (score >= config.doubleWinThreshold) {
-      return "Amazing! Double win!";
-    }
-
-    if (score >= config.moneyBackThreshold) {
-      return "Nice! You got your money back!";
-    }
-
+    if (score >= config.doubleWinThreshold) return "Amazing! Double win!";
+    if (score >= config.moneyBackThreshold) return "Nice! You got your money back!";
     return "Better luck next time!";
   }
 
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        onExit();
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onExit]);
-
   return (
-    <div className={styles.backdrop}>
-      <div
-        className={styles.modal}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="game-result-title"
-      >
-        <h2 id="game-result-title">Time’s up!</h2>
-
-        <p>Your score: {score ?? "-"}</p>
-
-        <p>{getFeedbackMessage()}</p>
-
-        {token ? (
-          <p>
-            You received: <strong>{token}</strong>
-          </p>
-        ) : (
-          <p>Generating reward...</p>
-        )}
-
+    <Modal onExit={onExit} labelId="game-result-title">
+      <h2 id="game-result-title">Time's up!</h2>
+      <p>Your score: {score ?? "–"}</p>
+      <p>{getFeedbackMessage()}</p>
+      {token ? (
+        <p>You received: <strong>{token}</strong></p>
+      ) : (
+        <p>Generating reward...</p>
+      )}
+      <div className="button-row">
         <Button onClick={onExit}>Exit</Button>
+        <Button onClick={onShowHighScores} variant="secondary">High Scores</Button>
       </div>
-    </div>
+    </Modal>
   );
 }

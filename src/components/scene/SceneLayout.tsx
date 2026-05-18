@@ -491,6 +491,23 @@ light2Decay: {
         }));
       },
     },
+
+      envRotation: {
+        value: config.environment.rotation,
+        min: -Math.PI,
+        max: Math.PI,
+        step: 0.01,
+        onChange: (v) => {
+          setConfig?.((prev: any) => ({
+            ...prev,
+            environment: {
+              ...prev.environment,
+              rotation: v,
+            },
+          }));
+        },
+      },
+
   });
 
   if (camera instanceof THREE.PerspectiveCamera) {
