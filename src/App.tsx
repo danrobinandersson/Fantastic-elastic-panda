@@ -21,6 +21,8 @@ import { SceneLayout } from "./components/scene/SceneLayout";
 import { defaultSceneConfig } from "./config/sceneConfig";
 import { api } from "./api";
 
+import ScoreboardModal from "./components/ui/ScoreboardModal";
+
 export default function App() {
   /*
     GAME STORE
@@ -45,16 +47,20 @@ export default function App() {
   const [apiError, setApiError] = useState<string | null>(null);
 
   /* Read identity token when app loads */
-
   useEffect(() => {
     async function loadPlayer() {
       try {
         const params = new URLSearchParams(window.location.search);
         const tokenFromUrl = params.get("identity_token");
 
+        console.log("URL token:", tokenFromUrl);
+
         if (!tokenFromUrl) {
           setApiError("No identity token found. Using mock player.");
           const identity = await api.getIdentity("mock-token");
+
+          console.log("Mock identity:", identity);
+
           setPlayer(identity.user);
           setIdentityToken("mock-token");
           return;
@@ -63,10 +69,14 @@ export default function App() {
         setIdentityToken(tokenFromUrl);
 
         const identity = await api.getIdentity(tokenFromUrl);
+
+        console.log("Real identity:", identity);
+
         setPlayer(identity.user);
 
         window.history.replaceState({}, "", window.location.pathname);
       } catch (error) {
+        console.error("Identity error:", error);
         setApiError("Could not load player identity.");
       }
     }
@@ -176,6 +186,8 @@ export default function App() {
 
     setScore(finalScore);
 
+    console.log("Final score:", finalScore);
+
     if (transactionId && finalScore >= config.moneyBackThreshold) {
       const payoutAmount =
         finalScore >= config.doubleWinThreshold
@@ -187,8 +199,14 @@ export default function App() {
       });
     }
 
+    console.log("Payout complete");
+
     finishGame(finalScore);
   }, [finishGame, transactionId, config]);
+
+  /* Scoreboard */
+
+  const [showScoreboard, setShowScoreboard] = useState(false);
 
   /*
     EXIT GAME
@@ -208,6 +226,10 @@ export default function App() {
           config={config}
           onExit={handleExitGame}
         />
+      )}
+
+      {showScoreboard && (
+        <ScoreboardModal onClose={() => setShowScoreboard(false)} />
       )}
 
       <div className="scene-wrapper">
@@ -295,12 +317,15 @@ export default function App() {
                     setApiError("Missing identity token.");
                     return;
                   }
+                  console.log("Creating transaction...");
 
                   const transaction = await api.createTransaction({
                     identity_token: identityToken,
                     amount: config.price,
                     amusement_uuid: import.meta.env.VITE_AMUSEMENT_UUID,
                   });
+
+                  console.log("Transaction result:", transaction);
 
                   setTransactionId(transaction.id);
                   setRewardToken(transaction.stamp);
@@ -329,6 +354,10 @@ export default function App() {
               <Button onClick={handleGameComplete}>Score</Button>
 
               <Button onClick={handleReset}>Reset</Button>
+
+              <Button onClick={() => setShowScoreboard(true)}>
+                Scoreboard
+              </Button>
             </div>
           </div>
         </div>
