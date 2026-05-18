@@ -55,11 +55,15 @@ body {
   place-items: center;
 
   overflow: hidden;
+  background-color: #0f1724;
 
   background-image: url("/BG_Cartoony.png");
-  background-size: cover;
-  background-position: center;
   background-repeat: no-repeat;
+  background-position: center center;
+  background-size: auto 100vh;
+
+  /* Optional: keep the background fixed relative to viewport */
+  background-attachment: fixed;
 }
 
 .scene-wrapper {
@@ -135,7 +139,7 @@ body {
   clamp(60px, 8vw, 100px)
     clamp(130px, 18vh, 190px);
 
-  transform: translateY(2%);
+  transform: translateY(-2%);
 }
 
 
@@ -145,5 +149,31 @@ body {
 @media (max-width: 430px) {
   .scene-wrapper {
     border-radius: 20px;
+  }
+}
+
+
+@media (max-aspect-ratio: 9/16) {
+  body {
+    /* Fit image to viewport width, height grows proportionally */
+    background-size: 265% auto;
+
+    /* keep image centered */
+    background-position: center center;
+
+    /* use solid black bars above/below */
+    background-color: #000;
+    
+  }
+
+  /* Ensure the scene stays centered vertically */
+  html, body, #root, main {
+    height: 100%;
+  }
+
+  .scene-wrapper {
+    /* ensure the wrapper is centered in the available viewport */
+    margin-block: auto;
+    
   }
 }
