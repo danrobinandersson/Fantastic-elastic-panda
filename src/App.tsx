@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, Suspense, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 import { PlayerPanda } from "./components/scene/PlayerPanda";
 import { TargetPanda } from "./components/scene/TargetPanda";
@@ -7,6 +7,7 @@ import { FaceControls } from "./components/controls/FaceControls";
 import Timer from "./components/ui/Timer";
 import Button from "./components/ui/Button";
 import GameResultModal from "./components/ui/GameResultModal";
+import TutorialModal from "./components/ui/TutorialModal";
 
 import { randomFace, scoreMatch } from "./utils/faceUtils";
 
@@ -118,6 +119,9 @@ export default function App() {
   */
   const [resetTrigger, setResetTrigger] = useState(0);
 
+  /* Tutorial modal */
+  const [showTutorial, setShowTutorial] = useState(false);
+
   /*
     SPRING SETTINGS
   */
@@ -217,6 +221,14 @@ export default function App() {
     exitGame();
   }, [exitGame]);
 
+  /* Show tutorial on first visit */
+  useEffect(() => {
+    try {
+      const seen = window.localStorage.getItem("tutorialSeen");
+      if (!seen) setShowTutorial(true);
+    } catch (_) {}
+  }, []);
+
   return (
     <main>
       {phase === "finished" && (
@@ -225,11 +237,23 @@ export default function App() {
           token={rewardToken}
           config={config}
           onExit={handleExitGame}
+          onShowHighScores={() => setShowScoreboard(true)}
         />
       )}
 
       {showScoreboard && (
         <ScoreboardModal onClose={() => setShowScoreboard(false)} />
+      )}
+
+      {showTutorial && (
+        <TutorialModal
+          onClose={() => {
+            setShowTutorial(false);
+            try {
+              window.localStorage.setItem("tutorialSeen", "true");
+            } catch (_) {}
+          }}
+        />
       )}
 
       <div className="scene-wrapper">
@@ -262,13 +286,11 @@ export default function App() {
           <div className="overlay-ui">
             {/* TIMER */}
 
-            <div className="top-bar">
               <Timer
-                duration={10}
+                duration={config.timerSeconds ?? 20}
                 isRunning={phase === "playing"}
                 onComplete={handleGameComplete}
               />
-            </div>
 
             {/* TARGET WINDOW */}
 
@@ -313,10 +335,16 @@ export default function App() {
             <div className="bottom-controls">
               <Button
                 onClick={async () => {
+                  if (showTutorial) {
+                    setShowTutorial(true);
+                    return;
+                  }
+
                   if (!identityToken) {
                     setApiError("Missing identity token.");
                     return;
                   }
+
                   console.log("Creating transaction...");
 
                   const transaction = await api.createTransaction({
@@ -345,18 +373,18 @@ export default function App() {
               </Button>
 
               <Button
-                onClick={() => console.log("clicked tutorial")}
+                onClick={() => setShowTutorial(true)}
                 variant="secondary"
               >
                 Tutorial
               </Button>
 
-              <Button onClick={handleGameComplete}>Score</Button>
+              {/* <Button onClick={handleGameComplete}>Score</Button> */}
 
               <Button onClick={handleReset}>Reset</Button>
 
               <Button onClick={() => setShowScoreboard(true)}>
-                Scoreboard
+                Highscore 
               </Button>
             </div>
           </div>

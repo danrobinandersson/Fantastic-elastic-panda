@@ -139,7 +139,7 @@ body {
   clamp(60px, 8vw, 100px)
     clamp(130px, 18vh, 190px);
 
-  transform: translateY(-2%);
+  transform: translateY(2%);
 }
 
 
