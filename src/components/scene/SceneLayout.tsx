@@ -26,7 +26,7 @@ export function SceneLayout({
   config,
   setConfig,
   background = null,
-  debug = true, // change to true to enable debug panel
+  debug = false, // change to true to enable debug panel
   className,
   cameraOverride,
 }: Props) {

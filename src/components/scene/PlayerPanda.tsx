@@ -81,9 +81,7 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
   position={[32, 13.7448, -24.33]}
   material={materials.Panda}
   scale={[1, 1, 1]}
-  castShadow={false}
-  receiveShadow={false}
-  
+
 />
 
 <mesh
