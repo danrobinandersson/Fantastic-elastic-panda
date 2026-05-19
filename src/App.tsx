@@ -341,6 +341,7 @@ export default function App() {
             <div className="bottom-controls">
               <Button
                 onClick={async () => {
+                      handleReset();
                   if (showTutorial) {
                     setShowTutorial(true);
                     return;
