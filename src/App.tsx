@@ -186,32 +186,49 @@ export default function App() {
   /*
   FINISH GAME
 */
-  const handleGameComplete = useCallback(async () => {
-    const finalScore = scoreMatch(targetRef.current, blendshapesRef.current);
+  const finalizeTimeoutRef = useRef<number | null>(null);
 
-    setScore(finalScore);
+  const [showScoreboard, setShowScoreboard] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const [freezeControls, setFreezeControls] = useState(false);
 
-    console.log("Final score:", finalScore);
+  const handleGameComplete = useCallback(() => {
+    setFreezeControls(true);
 
-    if (transactionId && finalScore >= config.moneyBackThreshold) {
-      const payoutAmount =
-        finalScore >= config.doubleWinThreshold
-          ? config.price * 2
-          : config.price;
-
-      await api.payOut(transactionId, {
-        amount: payoutAmount,
-      });
+    if (finalizeTimeoutRef.current) {
+      window.clearTimeout(finalizeTimeoutRef.current);
+      finalizeTimeoutRef.current = null;
     }
 
-    console.log("Payout complete");
+    finalizeTimeoutRef.current = window.setTimeout(async () => {
+      const finalScore = scoreMatch(targetRef.current, blendshapesRef.current);
 
-    finishGame(finalScore);
+      setScore(finalScore);
+
+      console.log("Final score:", finalScore);
+
+      if (transactionId && finalScore >= config.moneyBackThreshold) {
+        const payoutAmount =
+          finalScore >= config.doubleWinThreshold ? config.price * 2 : config.price;
+
+        try {
+          await api.payOut(transactionId, {
+            amount: payoutAmount,
+          });
+        } catch (err) {
+          console.error("Payout error", err);
+        }
+      }
+
+      console.log("Payout complete");
+
+      finishGame(finalScore);
+      setFreezeControls(false);
+      finalizeTimeoutRef.current = null;
+    }, 600);
   }, [finishGame, transactionId, config]);
 
   /* Scoreboard */
-
-  const [showScoreboard, setShowScoreboard] = useState(false);
 
   /*
     EXIT GAME
@@ -228,6 +245,15 @@ export default function App() {
       const seen = window.localStorage.getItem("tutorialSeen");
       if (!seen) setShowTutorial(true);
     } catch (_) {}
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (finalizeTimeoutRef.current) {
+        window.clearTimeout(finalizeTimeoutRef.current);
+        finalizeTimeoutRef.current = null;
+      }
+    };
   }, []);
 
   return (
@@ -277,6 +303,7 @@ export default function App() {
             <FaceControls
               onBlendshapesChange={setBlendshapes}
               resetTrigger={resetTrigger}
+              disabled={freezeControls}
             />
           </div>
 
@@ -285,7 +312,7 @@ export default function App() {
           ========================= */}
 
           <div className="overlay-ui">
-            {/* TIMER / TOP STATUS */}
+            {/* TIMER / HIGHSCORE BUTTON */}
 
             {phase === "playing" ? (
               <Timer
@@ -312,14 +339,9 @@ export default function App() {
                   config={sceneConfig}
                   background={null}
                   cameraOverride={{
-                    /*
-                      Slightly higher framing
-                    */
+                    /* Slightly higher framing */
                     y: sceneConfig.camera.y * 1.1,
-
-                    /*
-                      Closer zoom
-                    */
+                    /* Closer zoom */
                     z: sceneConfig.camera.z * 0.65,
                   }}
                 >
@@ -339,54 +361,56 @@ export default function App() {
             {/* BUTTONS */}
 
             <div className="bottom-controls">
-              <Button
-                onClick={async () => {
-                      handleReset();
-                  if (showTutorial) {
-                    setShowTutorial(true);
-                    return;
-                  }
+              {phase !== "playing" && !isStarting && (
+                <Button
+                  onClick={async () => {
+                    if (showTutorial) {
+                      setShowTutorial(true);
+                      return;
+                    }
 
-                  if (!identityToken) {
-                    setApiError("Missing identity token.");
-                    return;
-                  }
+                    if (isStarting) return;
 
-                  console.log("Creating transaction...");
+                    if (!identityToken) {
+                      setApiError("Missing identity token.");
+                      return;
+                    }
 
-                  const transaction = await api.createTransaction({
-                    identity_token: identityToken,
-                    amount: config.price,
-                    amusement_uuid: import.meta.env.VITE_AMUSEMENT_UUID,
-                  });
+                    try {
+                      setIsStarting(true);
 
-                  console.log("Transaction result:", transaction);
+                      const transaction = await api.createTransaction({
+                        identity_token: identityToken,
+                        amount: config.price,
+                        amusement_uuid: import.meta.env.VITE_AMUSEMENT_UUID,
+                      });
 
-                  setTransactionId(transaction.id);
-                  setRewardToken(transaction.stamp);
+                      setTransactionId(transaction.id);
+                      setRewardToken(transaction.stamp);
 
-                  const newTarget = randomFace();
+                      const newTarget = randomFace();
 
-                  setTarget(newTarget);
-                  targetRef.current = newTarget;
+                      setTarget(newTarget);
+                      targetRef.current = newTarget;
 
-                  setScore(null);
-                  setTargetSpinTrigger((v) => v + 1);
+                      setScore(null);
+                      setTargetSpinTrigger((v) => v + 1);
 
-                  startGame();
-                }}
-              >
-                Play
-              </Button>
+                      startGame();
+                    } catch (err) {
+                      console.error("Transaction/create error", err);
+                      setApiError("Could not create transaction.");
+                      setIsStarting(false);
+                    }
+                  }}
+                >
+                  Play
+                </Button>
+              )}
 
-              <Button
-                onClick={() => setShowTutorial(true)}
-                variant="secondary"
-              >
+              <Button onClick={() => setShowTutorial(true)} variant="secondary">
                 Tutorial
               </Button>
-
-              {/* <Button onClick={handleGameComplete}>Score</Button> */}
 
               <Button onClick={handleReset}>Reset</Button>
 

@@ -7,6 +7,7 @@ import type { ControlZone, BlendshapeValues } from '../../types/blendshape'
 interface FaceControlsProps {
   onBlendshapesChange?: (blendshapes: BlendshapeValues) => void
   resetTrigger?: number
+  disabled?: boolean
 }
 
 const ZONE_POSITIONS = {
@@ -28,6 +29,7 @@ const OFFSET_FRACTION = 0.06
 export const FaceControls: React.FC<FaceControlsProps> = ({
   onBlendshapesChange,
   resetTrigger,
+  disabled = false,
 }) => {
   const [blendshapes, setBlendshapes] = useState<BlendshapeValues>({} as BlendshapeValues)
   const [wrapperSize, setWrapperSize] = useState({ width: 300, height: 500 })
@@ -93,18 +95,17 @@ export const FaceControls: React.FC<FaceControlsProps> = ({
   }, [blendshapes, wrapperSize])
 
   return (
-    <div ref={wrapperRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+    <div ref={wrapperRef} style={{ position: 'absolute', inset: 0, pointerEvents: disabled ? 'none' : 'none' }}>
       {CONTROL_ZONES.map((zone: ControlZone) => (
         <DragZone
           key={zone.id}
           zone={zone}
-          onDragStart={startDrag}
-          onDrag={applyDrag}
-          onRelease={() => {}}
+          onDragStart={disabled ? undefined : startDrag}
+          onDrag={disabled ? undefined : applyDrag}
+          onRelease={disabled ? undefined : (() => {})}
           style={{
             ...getZoneStyle(zone),
-            pointerEvents: 'auto',
-            //border: '2px solid rgba(255, 255, 255, 0.8)' //Show zones borders,
+            pointerEvents: disabled ? 'none' : 'auto',
           }}
         />
       ))}
