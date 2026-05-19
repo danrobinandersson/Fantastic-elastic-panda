@@ -35,7 +35,7 @@ export const useGameStore = create<GameStore>()((set) => ({
 
   config: {
     price: 5,
-    timerSeconds: 30,
+    timerSeconds: 20,
     doubleWinThreshold: 95,
     moneyBackThreshold: 90,
   },
