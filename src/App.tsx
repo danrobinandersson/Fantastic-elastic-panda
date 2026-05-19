@@ -5,6 +5,7 @@ import { TargetPanda } from "./components/scene/TargetPanda";
 import { FaceControls } from "./components/controls/FaceControls";
 
 import Timer from "./components/ui/Timer";
+import HighscoreButton from "./components/ui/HighscoreButton";
 import Button from "./components/ui/Button";
 import GameResultModal from "./components/ui/GameResultModal";
 import TutorialModal from "./components/ui/TutorialModal";
@@ -284,13 +285,18 @@ export default function App() {
           ========================= */}
 
           <div className="overlay-ui">
-            {/* TIMER */}
+            {/* TIMER / TOP STATUS */}
 
+            {phase === "playing" ? (
               <Timer
                 duration={config.timerSeconds ?? 20}
                 isRunning={phase === "playing"}
                 onComplete={handleGameComplete}
+                compact
               />
+            ) : (
+              <HighscoreButton onClick={() => setShowScoreboard(true)} />
+            )}
 
             {/* TARGET WINDOW */}
 
@@ -383,9 +389,6 @@ export default function App() {
 
               <Button onClick={handleReset}>Reset</Button>
 
-              <Button onClick={() => setShowScoreboard(true)}>
-                Highscore 
-              </Button>
             </div>
           </div>
         </div>
