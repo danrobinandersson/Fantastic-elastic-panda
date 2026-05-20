@@ -364,6 +364,8 @@ export default function App() {
               {phase !== "playing" && !isStarting && (
                 <Button
                   onClick={async () => {
+                    {handleReset()}
+
                     if (showTutorial) {
                       setShowTutorial(true);
                       return;
