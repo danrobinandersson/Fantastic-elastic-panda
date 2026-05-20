@@ -127,8 +127,8 @@ export default function App() {
     SPRING SETTINGS
   */
   const [springConfig, setSpringConfig] = useState({
-    stiffness: 100,
-    damping: 12,
+    stiffness: 400,
+    damping: 32,
     mass: 1,
   });
 
