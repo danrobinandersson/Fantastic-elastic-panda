@@ -1,0 +1,25 @@
+# Supabase Local Development Configuration
+# https://supabase.com/docs/guides/local-development/cli/config
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 3000
+
+[functions]
+# port = 54323
+import_map = "./functions/import_map.json"
+
+[analytics]
+enabled = true
+port = 54327
+vector_port = 54328
