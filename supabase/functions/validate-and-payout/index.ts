@@ -31,11 +31,101 @@ const CONTROLLABLE_MORPH_KEYS = [
 
 // Blendshape max values (default 1.0, can be overridden per key)
 const BLENDSHAPE_MAX_VALUES: Record<string, number> = {
-  // Defaults to 1.0 for all keys
+  // Ears (maxValue: 0.5)
+  R_Ear_Right: 0.5, R_Ear_Left: 0.5, R_Ear_Up: 0.5, R_Ear_Down: 0.5,
+  L_Ear_Right: 0.5, L_Ear_Left: 0.5, L_Ear_Up: 0.5, L_Ear_Down: 0.5,
+  // Right cheek (maxValue: 0.70)
+  R_Cheek_Right: 0.70, R_Cheek_Up: 0.70, R_Cheek_Down: 0.70,
+  // Left cheek (maxValue: 0.65)
+  L_Cheek_Left: 0.65, L_Cheek_Up: 0.65, L_Cheek_Down: 0.65,
+  // Nose (maxValue: 0.5)
+  Nose_Right: 0.5, Nose_Left: 0.5, Nose_Up: 0.5, Nose_Down: 0.5,
+  // Mouth (maxValue: 0.75)
+  Mouth_Right: 0.75, Mouth_Left: 0.75, Mouth_Up: 0.75, Mouth_Down: 0.75,
+  // Brows default to 1.0, no entry needed
 };
 
 function getBlendshapeMaxValue(key: string): number {
   return BLENDSHAPE_MAX_VALUES[key] ?? 1.0;
+}
+
+// Constraint interface
+interface Constraint {
+  target: string;
+  min?: (current: Record<string, number>) => number;
+  max?: (current: Record<string, number>) => number;
+}
+
+// Constraints from frontend controlConstraints.ts
+// Enforces mutually exclusive movements (up/down, left/right)
+const CONSTRAINTS: Constraint[] = [
+  // Mouth: Up and Down are mutually exclusive
+  { target: 'Mouth_Up', max: (bs) => bs['Mouth_Down'] > 0 ? 0 : 1 },
+  { target: 'Mouth_Down', max: (bs) => bs['Mouth_Up'] > 0 ? 0 : 1 },
+  // Mouth: Left and Right are mutually exclusive
+  { target: 'Mouth_Left', max: (bs) => bs['Mouth_Right'] > 0 ? 0 : 1 },
+  { target: 'Mouth_Right', max: (bs) => bs['Mouth_Left'] > 0 ? 0 : 1 },
+
+  // Brows: Up and Down are mutually exclusive per side
+  { target: 'L_Brow_Up', max: (bs) => bs['L_Brow_Down'] > 0 ? 0 : 1 },
+  { target: 'L_Brow_Down', max: (bs) => bs['L_Brow_Up'] > 0 ? 0 : 1 },
+  { target: 'R_Brow_Up', max: (bs) => bs['R_Brow_Down'] > 0 ? 0 : 1 },
+  { target: 'R_Brow_Down', max: (bs) => bs['R_Brow_Up'] > 0 ? 0 : 1 },
+  // Brows: Left and Right are mutually exclusive per side
+  { target: 'L_Brow_Left', max: (bs) => bs['L_Brow_Right'] > 0 ? 0 : 1 },
+  { target: 'L_Brow_Right', max: (bs) => bs['L_Brow_Left'] > 0 ? 0 : 1 },
+  { target: 'R_Brow_Left', max: (bs) => bs['R_Brow_Right'] > 0 ? 0 : 1 },
+  { target: 'R_Brow_Right', max: (bs) => bs['R_Brow_Left'] > 0 ? 0 : 1 },
+
+  // Cheeks: Up and Down are mutually exclusive per side
+  { target: 'L_Cheek_Up', max: (bs) => bs['L_Cheek_Down'] > 0 ? 0 : 1 },
+  { target: 'L_Cheek_Down', max: (bs) => bs['L_Cheek_Up'] > 0 ? 0 : 1 },
+  { target: 'R_Cheek_Up', max: (bs) => bs['R_Cheek_Down'] > 0 ? 0 : 1 },
+  { target: 'R_Cheek_Down', max: (bs) => bs['R_Cheek_Up'] > 0 ? 0 : 1 },
+
+  // Ears: Up and Down are mutually exclusive per side
+  { target: 'L_Ear_Up', max: (bs) => bs['L_Ear_Down'] > 0 ? 0 : 1 },
+  { target: 'L_Ear_Down', max: (bs) => bs['L_Ear_Up'] > 0 ? 0 : 1 },
+  { target: 'R_Ear_Up', max: (bs) => bs['R_Ear_Down'] > 0 ? 0 : 1 },
+  { target: 'R_Ear_Down', max: (bs) => bs['R_Ear_Up'] > 0 ? 0 : 1 },
+  // Ears: Left and Right are mutually exclusive per side
+  { target: 'L_Ear_Left', max: (bs) => bs['L_Ear_Right'] > 0 ? 0 : 1 },
+  { target: 'L_Ear_Right', max: (bs) => bs['L_Ear_Left'] > 0 ? 0 : 1 },
+  { target: 'R_Ear_Left', max: (bs) => bs['R_Ear_Right'] > 0 ? 0 : 1 },
+  { target: 'R_Ear_Right', max: (bs) => bs['R_Ear_Left'] > 0 ? 0 : 1 },
+
+  // Nose: Up and Down are mutually exclusive
+  { target: 'Nose_Up', max: (bs) => bs['Nose_Down'] > 0 ? 0 : 1 },
+  { target: 'Nose_Down', max: (bs) => bs['Nose_Up'] > 0 ? 0 : 1 },
+  // Nose: Left and Right are mutually exclusive
+  { target: 'Nose_Left', max: (bs) => bs['Nose_Right'] > 0 ? 0 : 1 },
+  { target: 'Nose_Right', max: (bs) => bs['Nose_Left'] > 0 ? 0 : 1 },
+];
+
+// Apply all constraints to a blendshape values object
+function applyConstraints(values: Record<string, number>): Record<string, number> {
+  for (const constraint of CONSTRAINTS) {
+    const currentValue = values[constraint.target] ?? 0;
+    let clampedValue = currentValue;
+
+    if (constraint.min) {
+      const minAllowed = constraint.min(values);
+      if (clampedValue < minAllowed) {
+        clampedValue = minAllowed;
+      }
+    }
+
+    if (constraint.max) {
+      const maxAllowed = constraint.max(values);
+      if (clampedValue > maxAllowed) {
+        clampedValue = maxAllowed;
+      }
+    }
+
+    values[constraint.target] = clampedValue;
+  }
+
+  return values;
 }
 
 // Rate limit constants (tunable)
@@ -305,8 +395,12 @@ serve(async (req) => {
       );
     }
 
-    // Server-side score validation
-    const validatedScore = scoreMatch(playerBlendshapes, targetBlendshapes);
+    // Server-side score validation: Apply constraints first, then score
+    // Make copies to avoid mutating original data
+    const constrainedTarget = applyConstraints({ ...targetBlendshapes });
+    const constrainedPlayer = applyConstraints({ ...playerBlendshapes });
+    
+    const validatedScore = scoreMatch(constrainedTarget, constrainedPlayer);
     console.log(`Validated score: ${validatedScore}`);
 
     // Update session with validated score and mark as completed

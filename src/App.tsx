@@ -45,7 +45,7 @@ export default function App() {
   const [player, setPlayer] = useState<{ id: string; name: string } | null>(
     null,
   );
-  const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [transactionId, setTransactionId] = useState<number>(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -231,7 +231,7 @@ export default function App() {
             identityToken,
             playerBlendshapes: blendshapesRef.current,
             targetBlendshapes: targetRef.current,
-            tivoliTransactionId: parseInt(transactionId || "0", 10),
+            tivoliTransactionId: transactionId || 0,
             payoutAmount,
           });
 
@@ -240,7 +240,7 @@ export default function App() {
             identityToken: identityToken,
             playerBlendshapes: blendshapesRef.current,
             targetBlendshapes: targetRef.current,
-            tivoliTransactionId: parseInt(transactionId || "0", 10),
+            tivoliTransactionId: transactionId || 0,
             payoutAmount: payoutAmount,
           });
 
@@ -431,7 +431,7 @@ export default function App() {
                         amusement_uuid: import.meta.env.VITE_AMUSEMENT_UUID,
                       });
 
-                      setTransactionId(transaction.id);
+                      setTransactionId(parseInt(transaction.id, 10));
                       setRewardToken(transaction.stamp);
 
                       // Create a Supabase session for this game
