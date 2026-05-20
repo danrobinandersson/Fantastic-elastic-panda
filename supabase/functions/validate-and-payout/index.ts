@@ -8,19 +8,40 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
 const CENTRALBANK_BASE_URL = Deno.env.get("CENTRALBANK_BASE_URL") || "https://api-develop-b059.up.railway.app";
 const AMUSEMENT_API_KEY = Deno.env.get("AMUSEMENT_API_KEY");
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const SB_URL = Deno.env.get("SB_URL");
+const SERVICE_ROLE_KEY = Deno.env.get("SERVICE_ROLE_KEY");
 
-if (!AMUSEMENT_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+if (!AMUSEMENT_API_KEY || !SB_URL || !SERVICE_ROLE_KEY) {
   throw new Error("Missing required environment variables");
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+const supabase = createClient(SB_URL, SERVICE_ROLE_KEY);
+
+// Controllable blendshapes (from frontend config)
+const CONTROLLABLE_MORPH_KEYS = [
+  'L_Brow_Down', 'L_Brow_Left', 'L_Brow_Right', 'L_Brow_Up',
+  'L_Cheek_Down', 'L_Cheek_Left', 'L_Cheek_Up',
+  'L_Ear_Down', 'L_Ear_Left', 'L_Ear_Right', 'L_Ear_Up',
+  'Mouth_Down', 'Mouth_Left', 'Mouth_Right', 'Mouth_Up',
+  'Nose_Down', 'Nose_Left', 'Nose_Right', 'Nose_Up',
+  'R_Brow_Down', 'R_Brow_Left', 'R_Brow_Right', 'R_Brow_Up',
+  'R_Cheek_Down', 'R_Cheek_Right', 'R_Cheek_Up',
+  'R_Ear_Down', 'R_Ear_Left', 'R_Ear_Right', 'R_Ear_Up',
+] as const;
+
+// Blendshape max values (default 1.0, can be overridden per key)
+const BLENDSHAPE_MAX_VALUES: Record<string, number> = {
+  // Defaults to 1.0 for all keys
+};
+
+function getBlendshapeMaxValue(key: string): number {
+  return BLENDSHAPE_MAX_VALUES[key] ?? 1.0;
+}
 
 // Rate limit constants (tunable)
 const RATE_LIMIT_WINDOW_SECONDS = 60;
-const MAX_REQUESTS_PER_MINUTE = 10; // Per user
-const COOLDOWN_AFTER_PAYOUT_SECONDS = 5; // Minimum cooldown after payout attempt
+const MAX_REQUESTS_PER_MINUTE = 10;
+const COOLDOWN_AFTER_PAYOUT_SECONDS = 5;
 
 interface ValidatePayoutRequest {
   sessionId: string;
@@ -37,33 +58,27 @@ interface RateLimitResult {
   resetSeconds: number;
 }
 
-// Score matching function (server-side authoritative)
 function scoreMatch(
   playerShapes: Record<string, number>,
   targetShapes: Record<string, number>,
 ): number {
-  let totalDistance = 0;
-  let count = 0;
+  let sumError = 0;
 
-  for (const key in targetShapes) {
-    if (key in playerShapes) {
-      const diff = Math.abs(playerShapes[key] - targetShapes[key]);
-      totalDistance += diff;
-      count++;
-    }
+  for (const key of CONTROLLABLE_MORPH_KEYS) {
+    const max = getBlendshapeMaxValue(key);
+    const targetVal = ((targetShapes[key] ?? 0) / max);
+    const playerVal = ((playerShapes[key] ?? 0) / max);
+    sumError += Math.abs(targetVal - playerVal);
   }
 
-  const avgDistance = count > 0 ? totalDistance / count : 1;
-  const score = Math.max(0, Math.min(100, 100 - avgDistance * 50));
-  return Math.round(score * 100) / 100;
+  const avgError = sumError / CONTROLLABLE_MORPH_KEYS.length;
+  return Math.max(0, Math.round((1 - avgError) * 100));
 }
 
-// Check rate limit for a user
 async function checkRateLimit(userId: string, requestType: string): Promise<RateLimitResult> {
   const now = new Date();
   const windowStart = new Date(now.getTime() - RATE_LIMIT_WINDOW_SECONDS * 1000);
 
-  // Count recent requests
   const { data: recentRequests, error: countError } = await supabase
     .from("rate_limit_log")
     .select("id", { count: "exact" })
@@ -87,7 +102,6 @@ async function checkRateLimit(userId: string, requestType: string): Promise<Rate
   };
 }
 
-// Record rate limit attempt
 async function recordRateLimitAttempt(userId: string, requestType: string): Promise<void> {
   const { error } = await supabase
     .from("rate_limit_log")
@@ -96,7 +110,6 @@ async function recordRateLimitAttempt(userId: string, requestType: string): Prom
   if (error) console.error("Failed to record rate limit:", error);
 }
 
-// Process payout with Centralbank
 async function processPayout(
   tivoliTransactionId: number,
   payoutAmount: number,
@@ -122,13 +135,22 @@ async function processPayout(
   }
 }
 
-// Main handler
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey",
+  "Content-Type": "application/json",
+};
+
 serve(async (req) => {
-  // Only POST allowed
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { "Content-Type": "application/json" },
+      headers: corsHeaders,
     });
   }
 
@@ -138,60 +160,135 @@ serve(async (req) => {
     const { sessionId, identityToken, playerBlendshapes, targetBlendshapes, tivoliTransactionId, payoutAmount } =
       body;
 
-    // Validate input
     if (
       !sessionId ||
       !identityToken ||
       !playerBlendshapes ||
       !targetBlendshapes ||
-      !tivoliTransactionId ||
+      tivoliTransactionId === null ||
+      tivoliTransactionId === undefined ||
       payoutAmount === undefined
     ) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
+        { status: 400, headers: corsHeaders },
       );
     }
 
-    // Fetch session from database
-    const { data: session, error: sessionError } = await supabase
+    // Fetch or create session in database
+    // Get or create user first
+    let userId: string;
+    
+    // In mock mode (tivoliTransactionId = 0), create a mock user
+    if (tivoliTransactionId === 0) {
+      const mockUserName = `MockPlayer_${identityToken.substring(0, 8)}`;
+      
+      // Try to find existing mock user first
+      const { data: existingMockUser, error: lookupError } = await supabase
+        .from("game_users")
+        .select("id")
+        .eq("name", mockUserName)
+        .single();
+      
+      if (existingMockUser) {
+        userId = existingMockUser.id;
+        console.log(`Using existing mock user: ${userId}`);
+      } else if (lookupError?.code === "PGRST116") {
+        // User doesn't exist, create it
+        const { data: newUser, error: createUserError } = await supabase
+          .from("game_users")
+          .insert({ 
+            name: mockUserName
+          })
+          .select("id")
+          .single();
+
+        if (createUserError || !newUser) {
+          console.error("Failed to create mock user:", createUserError);
+          throw new Error("Could not create user record");
+        }
+        userId = newUser.id;
+        console.log(`Created new mock user: ${userId}`);
+      } else if (lookupError) {
+        console.error("Failed to lookup mock user:", lookupError);
+        throw new Error("Could not lookup user record");
+      } else {
+        throw new Error("Could not determine mock user");
+      }
+    } else {
+      // Real mode: look up by centralbank_user_id
+      const { data: existingUser, error: userError } = await supabase
+        .from("game_users")
+        .select("id")
+        .eq("centralbank_user_id", tivoliTransactionId)
+        .single();
+
+      if (existingUser) {
+        userId = existingUser.id;
+      } else if (userError?.code === "PGRST116") {
+        // User doesn't exist, create it
+        const { data: newUser, error: createUserError } = await supabase
+          .from("game_users")
+          .insert({ 
+            name: `Player_${tivoliTransactionId}`,
+            centralbank_user_id: tivoliTransactionId
+          })
+          .select("id")
+          .single();
+
+        if (createUserError || !newUser) {
+          console.error("Failed to create user:", createUserError);
+          throw new Error("Could not create user record");
+        }
+        userId = newUser.id;
+      } else if (userError) {
+        console.error("User query error:", userError);
+        throw new Error("Could not query user");
+      } else {
+        throw new Error("User lookup failed");
+      }
+    }
+
+    // Now get or create session
+    let session;
+    const { data: existingSession, error: sessionError } = await supabase
       .from("game_sessions")
       .select("*")
       .eq("id", sessionId)
       .eq("identity_token", identityToken)
       .single();
 
-    if (sessionError || !session) {
-      return new Response(
-        JSON.stringify({ error: "Session not found or invalid identity token" }),
-        { status: 404, headers: { "Content-Type": "application/json" } },
-      );
-    }
-
-    // Get or create user
-    let userId = session.user_id;
-    if (!userId) {
-      const { data: user, error: userError } = await supabase
-        .from("game_users")
-        .select("id")
-        .eq("id", session.user_id)
+    if (existingSession) {
+      session = existingSession;
+    } else if (sessionError?.code === "PGRST116") {
+      // Session doesn't exist, create it with the user_id
+      const { data: newSession, error: createError } = await supabase
+        .from("game_sessions")
+        .insert({
+          id: sessionId,
+          user_id: userId,
+          identity_token: identityToken,
+          game_state: "in_progress",
+          player_blendshapes: playerBlendshapes,
+          target_blendshapes: targetBlendshapes,
+        })
+        .select()
         .single();
 
-      if (userError || !user) {
-        // Create new user record if needed
-        const { data: newUser, error: createError } = await supabase
-          .from("game_users")
-          .insert({ name: `Player_${tivoliTransactionId}` })
-          .select("id")
-          .single();
-
-        if (createError || !newUser) {
-          throw new Error("Could not create user record");
-        }
-        userId = newUser.id;
-      } else {
-        userId = user.id;
+      if (createError || !newSession) {
+        console.error("Failed to create session:", createError);
+        return new Response(
+          JSON.stringify({ error: "Failed to create game session" }),
+          { status: 500, headers: corsHeaders },
+        );
       }
+      session = newSession;
+    } else if (sessionError) {
+      console.error("Session query error:", sessionError);
+      return new Response(
+        JSON.stringify({ error: "Session not found or invalid identity token" }),
+        { status: 404, headers: corsHeaders },
+      );
     }
 
     // Rate limit check: payout requests
@@ -204,7 +301,7 @@ serve(async (req) => {
           remainingRequests: rateLimit.remainingRequests,
           resetSeconds: rateLimit.resetSeconds,
         }),
-        { status: 429, headers: { "Content-Type": "application/json" } },
+        { status: 429, headers: corsHeaders },
       );
     }
 
@@ -231,12 +328,11 @@ serve(async (req) => {
     await recordRateLimitAttempt(userId, "request_payout");
 
     // If payout amount > 0, process payout
-    let payoutResult = { success: false, error: "No payout requested" };
+    let payoutResult: { success: boolean; error?: string } = { success: false, error: "No payout requested" };
     if (payoutAmount > 0) {
       payoutResult = await processPayout(tivoliTransactionId, payoutAmount);
 
       if (payoutResult.success) {
-        // Record successful payout
         const { error: payoutRecordError } = await supabase
           .from("payout_history")
           .insert({
@@ -252,7 +348,6 @@ serve(async (req) => {
           console.error("Failed to record payout:", payoutRecordError);
         }
       } else {
-        // Record failed payout
         const { error: payoutRecordError } = await supabase
           .from("payout_history")
           .insert({
@@ -279,13 +374,13 @@ serve(async (req) => {
         payoutSuccess: payoutResult.success,
         payoutError: payoutResult.error,
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } },
+      { status: 200, headers: corsHeaders },
     );
   } catch (error) {
     console.error("Edge Function error:", error);
     return new Response(
       JSON.stringify({ error: `Server error: ${error}` }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
+      { status: 500, headers: corsHeaders },
     );
   }
 });

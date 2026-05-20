@@ -36,8 +36,8 @@ export const useGameStore = create<GameStore>()((set) => ({
   config: {
     price: 5,
     timerSeconds: 15, // GameDuration Debug: 15 seconds
-    doubleWinThreshold: 95,
-    moneyBackThreshold: 90,
+    doubleWinThreshold: 80,
+    moneyBackThreshold: 70,
   },
 
   setPlayerBlendshapes: (values) => set({ playerBlendshapes: values }),

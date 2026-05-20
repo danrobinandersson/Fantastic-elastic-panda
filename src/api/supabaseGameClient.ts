@@ -134,14 +134,18 @@ export async function createGameSession(
   initialBlendshapes: Record<string, number>,
 ): Promise<{ sessionId: string } | null> {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    console.warn("Supabase not configured. Session creation disabled.");
     return null;
   }
 
   try {
-    // Call an edge function or directly insert via REST API
-    // For now, we'll track this server-side only (optional for client)
-    console.log("Session tracking would be stored server-side via Edge Function");
-    return null;
+    // Generate a unique session ID (UUID v4 format)
+    const sessionId = crypto.randomUUID();
+
+    // For now, we'll rely on the Edge Function to create the session record
+    // when validateAndPayout is called. We just return the sessionId here.
+    console.log("Session ID created:", sessionId);
+    return { sessionId };
   } catch (err) {
     console.error("Failed to create game session:", err);
     return null;

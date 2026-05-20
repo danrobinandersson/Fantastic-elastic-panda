@@ -105,7 +105,7 @@ app.post("/tivoli/transactions/:id/payout", async (req: express.Request, res: ex
 app.get('/tivoli/identity-tokens/:token', async (req: express.Request, res: express.Response) => {
   const { token } = req.params as { token?: string };
   try {
-    const resp = await fetch(`${CENTRALBANK_BASE_URL}/identity-tokens/${encodeURIComponent(token || "")}`);
+    const resp = await fetch(`${CENTRALBANK_BASE_URL}/identity-tokens/${encodeURIComponent(token || "")}?api_key=${encodeURIComponent(AMUSEMENT_API_KEY || "")}`);
     const text = await resp.text();
     const isJson = resp.headers.get("content-type")?.includes("application/json");
     if (!resp.ok) return res.status(resp.status).contentType(resp.headers.get("content-type") ?? "text/plain").send(text);

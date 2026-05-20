@@ -22,6 +22,7 @@ import "./App.css";
 
 import { defaultSceneConfig } from "./config/sceneConfig";
 import { api } from "./api";
+import { validateAndPayout, createGameSession } from "./api/supabaseGameClient";
 
 
 export default function App() {
@@ -45,6 +46,7 @@ export default function App() {
     null,
   );
   const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
   /* Read identity token when app loads */
@@ -58,6 +60,17 @@ export default function App() {
 
         if (!tokenFromUrl) {
           setApiError("No identity token found. Using mock player.");
+          
+          // Use mock identity if VITE_USE_MOCK_API is true
+          if (import.meta.env.VITE_USE_MOCK_API === "true") {
+            const mockIdentity = { user: { id: "mock-user", name: "Test Player" } };
+            setPlayer(mockIdentity.user);
+            // Generate unique mock token for each session (to satisfy UNIQUE constraint on identity_token)
+            setIdentityToken(`mock-token-${crypto.randomUUID()}`);
+            return;
+          }
+          
+          // Otherwise try to get a real identity with mock token (for testing)
           const identity = await api.getIdentity("mock-token");
 
           console.log("Mock identity:", identity);
@@ -108,6 +121,7 @@ export default function App() {
     SCORE
   */
   const [score, setScore] = useState<number | null>(null);
+  const [validatedScore, setValidatedScore] = useState<number | null>(null);
 
   /*
     REWARD TOKEN
@@ -206,16 +220,47 @@ export default function App() {
 
       console.log("Final score:", finalScore);
 
-      if (transactionId && finalScore >= config.moneyBackThreshold) {
+      // Call Supabase Edge Function for validated payout
+      if (sessionId && identityToken && finalScore >= config.moneyBackThreshold) {
         const payoutAmount =
           finalScore >= config.doubleWinThreshold ? config.price * 2 : config.price;
 
         try {
-          await api.payOut(transactionId, {
-            amount: payoutAmount,
+          console.log("Calling validateAndPayout with:", {
+            sessionId,
+            identityToken,
+            playerBlendshapes: blendshapesRef.current,
+            targetBlendshapes: targetRef.current,
+            tivoliTransactionId: parseInt(transactionId || "0", 10),
+            payoutAmount,
           });
+
+          const result = await validateAndPayout({
+            sessionId: sessionId,
+            identityToken: identityToken,
+            playerBlendshapes: blendshapesRef.current,
+            targetBlendshapes: targetRef.current,
+            tivoliTransactionId: parseInt(transactionId || "0", 10),
+            payoutAmount: payoutAmount,
+          });
+
+          console.log("Edge Function response:", result);
+
+          if (result.error) {
+            console.error("Edge Function error:", result.error);
+            // Check if it's a rate limit error object
+            if (typeof result.error === "object" && "remainingRequests" in result.error) {
+              console.warn("Rate limited. Remaining requests:", result.error.remainingRequests);
+            }
+          } else {
+            const serverScore = result.data?.validatedScore;
+            console.log("Payout successful. Validated score:", serverScore);
+            if (serverScore !== undefined) {
+              setValidatedScore(serverScore);
+            }
+          }
         } catch (err) {
-          console.error("Payout error", err);
+          console.error("Edge Function call error", err);
         }
       }
 
@@ -225,7 +270,7 @@ export default function App() {
       setFreezeControls(false);
       finalizeTimeoutRef.current = null;
     }, 600);
-  }, [finishGame, transactionId, config]);
+  }, [finishGame, transactionId, identityToken, sessionId, config]);
 
   /* Scoreboard */
 
@@ -388,6 +433,17 @@ export default function App() {
 
                       setTransactionId(transaction.id);
                       setRewardToken(transaction.stamp);
+
+                      // Create a Supabase session for this game
+                      const sessionResult = await createGameSession(
+                        identityToken,
+                        blendshapesRef.current,
+                      );
+                      
+                      if (sessionResult) {
+                        setSessionId(sessionResult.sessionId);
+                        console.log("Game session created:", sessionResult.sessionId);
+                      }
 
                       const newTarget = randomFace();
 
