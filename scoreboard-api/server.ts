@@ -160,30 +160,3 @@ app.post("/scores", async (req: express.Request, res: express.Response) => {
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
-       VALUES ($1, $2)
-       RETURNING id, player_name, score, created_at`,
-      [playerName, score],
-    );
-
-    res.status(201).json({
-      message: "Score saved",
-      score: result.rows[0],
-    });
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Database error",
-    });
-  }
-});
-
-/*
-  START SERVER
-*/
-const port = process.env.PORT || 3001;
-
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
-});

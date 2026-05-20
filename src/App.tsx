@@ -3,27 +3,26 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { PlayerPanda } from "./components/scene/PlayerPanda";
 import { TargetPanda } from "./components/scene/TargetPanda";
 import { FaceControls } from "./components/controls/FaceControls";
+import { randomFace, scoreMatch } from "./utils/faceUtils";
+import type { BlendshapeValues } from "./types/blendshape";
+import { SceneLayout } from "./components/scene/SceneLayout";
+
 
 import Timer from "./components/ui/Timer";
-import HighscoreButton from "./components/ui/HighscoreButton";
 import Button from "./components/ui/Button";
+import HighscoreButton from "./components/ui/HighscoreButton";
 import GameResultModal from "./components/ui/GameResultModal";
+import ScoreboardModal from "./components/ui/ScoreboardModal";
 import TutorialModal from "./components/ui/TutorialModal";
-
-import { randomFace, scoreMatch } from "./utils/faceUtils";
-
-import type { BlendshapeValues } from "./types/blendshape";
 
 import { useGameStore } from "./store/gameStore";
 
 import styles from "./App.module.css";
 import "./App.css";
 
-import { SceneLayout } from "./components/scene/SceneLayout";
 import { defaultSceneConfig } from "./config/sceneConfig";
 import { api } from "./api";
 
-import ScoreboardModal from "./components/ui/ScoreboardModal";
 
 export default function App() {
   /*
