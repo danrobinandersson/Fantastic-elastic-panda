@@ -27,6 +27,7 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
   const meshRef = useRef<THREE.Mesh>(null)
   const springs = useSpringStates(MORPH_KEYS)
   const { updateBlink } = useBlinkAnimation()
+  materials.Panda.vertexColors = false
 
   useFrame((_, delta) => {
     const mesh = meshRef.current
@@ -73,8 +74,26 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
           receiveShadow={props.receiveShadow}
           castShadow={props.castShadow}
         >
-          <mesh geometry={nodes.EyeL.geometry} material={materials.Panda} position={[-32, 13.7448, -24.33]} rotation={[Math.PI / 2, 0, 0]} scale={[1, 1, 1]} />
-          <mesh geometry={nodes.EyeR.geometry} material={materials.Panda} position={[32, 13.7448, -24.33]} rotation={[Math.PI / 2, 0, 0]} scale={[1, 1, 1]} />
+
+
+<mesh
+  geometry={nodes.EyeR.geometry}
+  position={[32, 13.7448, -24.33]}
+  material={materials.Panda}
+  scale={[1, 1, 1]}
+
+/>
+
+<mesh
+  geometry={nodes.EyeL.geometry}
+  position={[-32, 13.7448, -24.33]}
+  material={materials.Panda}
+  scale={[1, 1, 1]}
+/>
+
+
+
+
 {/*
 <mesh
   name="Body"
