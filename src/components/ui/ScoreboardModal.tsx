@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "./Button";
+import Modal from "./Modal";
 import styles from "./ScoreboardModal.module.css";
 
 type Score = {
@@ -27,9 +28,8 @@ export default function ScoreboardModal({ onClose }: ScoreboardModalProps) {
   }, []);
 
   return (
-    <div className={styles.backdrop}>
-      <div className={styles.modal}>
-        <h2>Scoreboard</h2>
+    <Modal onExit={onClose} labelId="scoreboard-title">
+      <h2 id="scoreboard-title">Scoreboard</h2>
 
         {scores.map((score, index) => (
           <div key={index}>
@@ -41,7 +41,6 @@ export default function ScoreboardModal({ onClose }: ScoreboardModalProps) {
         ))}
 
         <Button onClick={onClose}>Close</Button>
-      </div>
-    </div>
+      </Modal>
   );
 }

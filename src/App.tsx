@@ -22,7 +22,7 @@ import "./App.css";
 import { SceneLayout } from "./components/scene/SceneLayout";
 import { defaultSceneConfig } from "./config/sceneConfig";
 import { api } from "./api";
-
+import ControlsHint from "./components/ui/ControlsHint";
 import ScoreboardModal from "./components/ui/ScoreboardModal";
 
 export default function App() {
@@ -410,9 +410,7 @@ export default function App() {
                 </Button>
               )}
 
-              <Button onClick={() => setShowTutorial(true)} variant="secondary">
-                Tutorial
-              </Button>
+              <ControlsHint onOpenTutorial={() => setShowTutorial(true)} />
 
               <Button onClick={handleReset}>Reset</Button>
 
