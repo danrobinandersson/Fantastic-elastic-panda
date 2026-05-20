@@ -328,7 +328,7 @@ export default function App() {
             {/* TARGET WINDOW */}
 
             <div className={styles.targetWindow}>
-              <h1 className={styles.windowText}>TARGET</h1>
+              <h2 className={styles.windowText}>TARGET</h2>
 
               <div className={styles.targetCanvasWrapper}>
                 {/* RADIAL BACKGROUND */}

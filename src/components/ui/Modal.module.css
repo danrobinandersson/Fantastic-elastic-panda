@@ -54,15 +54,10 @@
   position: absolute;
   top: 10%;
   pointer-events: none;
-  color: #ff9d64;
   font-size: 9cqi;
   font-weight: bold;
   margin: 0;  /* same fix for h2 */
-  text-shadow:
-    0 3px 0 #e53900,
-    0 5px 0 #bd2900,
-    0 5px 10px #000000de,
-    0 5px 20px #000000de;
+
 }
 
 .modal button {

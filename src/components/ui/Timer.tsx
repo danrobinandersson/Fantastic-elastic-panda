@@ -43,9 +43,9 @@ export default function Timer({ duration, isRunning, onComplete }: TimerProps) {
           alt="Timer"
         />
 
-        <h1 className={`${styles.timer} ${count <= 5 ? styles.warning : ""}`}>
-          0 : {count}
-        </h1>
+        <h2 className={`${styles.timer} ${count <= 5 ? styles.warning : ""}`}>
+          {count}
+        </h2>
       </div>
     );
   }
@@ -58,9 +58,9 @@ export default function Timer({ duration, isRunning, onComplete }: TimerProps) {
         alt="Timer"
       />
 
-      <h1 className={`${styles.timer} ${count <= 5 ? styles.warning : ""}`}>
-        0 : {count}
-      </h1>
+      <h2 className={`${styles.timer} ${count <= 5 ? styles.warning : ""}`}>
+        {count}
+      </h2>
     </div>
   );
 }

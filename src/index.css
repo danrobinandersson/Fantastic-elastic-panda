@@ -13,19 +13,37 @@
 
   /* Accent / highlight */
   --color-gold-light: #ffe3b0;
-  --color-gold-main: #f5d18b;
+  --color-gold-main: #f88c2f;
 
   /* Borders / outlines */
   --color-brown-main: #8a552c;
   --color-brown-dark: #5b281a;
 
   /* States */
-  --color-warning: #ff3b2f;
+  --color-warning: #df0b00;
 
   /* Neutral */
   --color-black: #000;
   --color-white: #fff;
 }
+
+
+
+h2 {
+  pointer-events: none;
+  color: #f88c2f;
+  font-weight: bold;
+
+
+    text-shadow: 
+      0 .2rem 0 #a73906, 
+      0 .3rem 0 #3d0b00, 
+      0 .2rem 10px #000000de, 
+      0 .4rem 20px #000000;
+
+
+}
+
 
 canvas {
   width: 100% !important;
@@ -139,7 +157,7 @@ body {
   clamp(60px, 8vw, 100px)
     clamp(130px, 18vh, 190px);
 
-  transform: translateY(2%);
+  /* transform: translateY(2%); */
 }
 
 
@@ -156,7 +174,7 @@ body {
 @media (max-aspect-ratio: 9/16) {
   body {
     /* Fit image to viewport width, height grows proportionally */
-    background-size: 265% auto;
+    background-size: cover;
 
     /* keep image centered */
     background-position: center center;

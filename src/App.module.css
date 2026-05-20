@@ -96,7 +96,7 @@
 .windowText {
   position: absolute;
 
-  top: clamp(10px, 1.6vw, 16px);
+  top: clamp(16px, 2.6vw, 16px);
   left: 0;
   right: 0;
 
@@ -108,15 +108,9 @@
 
   pointer-events: none;
 
-  color: #ffe57e;
 
-  font-size: clamp(16px, 2vw, 24px);
 
-  font-weight: bold;
+  font-size: clamp(16px, 3vw, 32px);
 
-  text-shadow:
-    0 1px 0 #000,
-    0 2px 0 #000,
-    0 3px 0 #000,
-    0 4px 6px rgba(0, 0, 0, 0.6);
+
 }
