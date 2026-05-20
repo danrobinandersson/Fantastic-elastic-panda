@@ -1,38 +1,65 @@
 import express from "express";
 import cors from "cors";
-import { db } from "./db";
+import dotenv from "dotenv";
+import pg from "pg";
+
+dotenv.config();
+
+const { Pool } = pg;
 
 const app = express();
 
-// Allows your React frontend/Postman to call this API
 app.use(cors());
-
-// Allows Express to read JSON from req.body
 app.use(express.json());
 
+/*
+  SUPABASE DATABASE CONNECTION
+*/
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
+
+/*
+  ROOT ROUTE
+*/
 app.get("/", (req, res) => {
   res.send("Scoreboard API is running");
 });
 
+/*
+  GET TOP SCORES
+*/
 app.get("/scores", async (req, res) => {
   try {
-    const [rows] = await db.query(
-      `SELECT player_name, score, token, created_at
+    const result = await pool.query(
+      `SELECT id, player_name, score, created_at
        FROM scores
        ORDER BY score DESC, created_at ASC
        LIMIT 10`,
     );
 
-    res.json(rows);
+    res.json(result.rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Database error" });
+
+    res.status(500).json({
+      message: "Database error",
+    });
   }
 });
 
+/*
+  SAVE SCORE
+*/
 app.post("/scores", async (req, res) => {
-  const { playerName, score, token } = req.body;
+  const { playerName, score } = req.body;
 
+  /*
+    VALIDATION
+  */
   if (!playerName || typeof score !== "number") {
     return res.status(400).json({
       message: "playerName and score are required",
@@ -40,19 +67,31 @@ app.post("/scores", async (req, res) => {
   }
 
   try {
-    await db.query(
-      `INSERT INTO scores (player_name, score, token)
-       VALUES (?, ?, ?)`,
-      [playerName, score, token ?? null],
+    const result = await pool.query(
+      `INSERT INTO scores (player_name, score)
+       VALUES ($1, $2)
+       RETURNING id, player_name, score, created_at`,
+      [playerName, score],
     );
 
-    res.status(201).json({ message: "Score saved" });
+    res.status(201).json({
+      message: "Score saved",
+      score: result.rows[0],
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Database error" });
+
+    res.status(500).json({
+      message: "Database error",
+    });
   }
 });
 
-app.listen(3001, () => {
-  console.log("Server running on http://localhost:3001");
+/*
+  START SERVER
+*/
+const port = process.env.PORT || 3001;
+
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });
