@@ -35,7 +35,7 @@ app.get("/", (req, res) => {
 app.get("/scores", async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, player_name, score, created_at
+      `SELECT id, centralbank_user_id, player_name, score, created_at
        FROM scores
        ORDER BY score DESC, created_at ASC
        LIMIT 10`,
@@ -55,23 +55,32 @@ app.get("/scores", async (req, res) => {
   SAVE SCORE
 */
 app.post("/scores", async (req, res) => {
-  const { playerName, score } = req.body;
+  const { centralbankUserId, playerName, score } = req.body;
 
   /*
     VALIDATION
   */
-  if (!playerName || typeof score !== "number") {
+  if (!centralbankUserId || !playerName || typeof score !== "number") {
     return res.status(400).json({
-      message: "playerName and score are required",
+      message: "centralbankUserId, playerName and score are required",
     });
   }
 
   try {
     const result = await pool.query(
-      `INSERT INTO scores (player_name, score)
-       VALUES ($1, $2)
-       RETURNING id, player_name, score, created_at`,
-      [playerName, score],
+      `INSERT INTO scores (
+        centralbank_user_id,
+        player_name,
+        score
+      )
+       VALUES ($1, $2, $3)
+       RETURNING
+        id,
+        centralbank_user_id,
+        player_name,
+        score,
+        created_at`,
+      [centralbankUserId, playerName, score],
     );
 
     res.status(201).json({
