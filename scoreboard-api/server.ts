@@ -16,14 +16,14 @@ app.get("/", (req, res) => {
 
 app.get("/scores", async (req, res) => {
   try {
-    const [rows] = await db.query(
-      `SELECT player_name, score, token, created_at
+    const result = await db.query(
+      `SELECT player_name, score, created_at
        FROM scores
        ORDER BY score DESC, created_at ASC
        LIMIT 10`,
     );
 
-    res.json(rows);
+    res.json(result.rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Database error" });
@@ -31,7 +31,7 @@ app.get("/scores", async (req, res) => {
 });
 
 app.post("/scores", async (req, res) => {
-  const { playerName, score, token } = req.body;
+  const { playerName, score } = req.body;
 
   if (!playerName || typeof score !== "number") {
     return res.status(400).json({
@@ -41,9 +41,9 @@ app.post("/scores", async (req, res) => {
 
   try {
     await db.query(
-      `INSERT INTO scores (player_name, score, token)
-       VALUES (?, ?, ?)`,
-      [playerName, score, token ?? null],
+      `INSERT INTO scores (player_name, score)
+       VALUES (?, ?)`,
+      [playerName, score],
     );
 
     res.status(201).json({ message: "Score saved" });
