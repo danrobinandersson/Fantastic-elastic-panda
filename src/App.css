@@ -38,7 +38,8 @@ button:active {
 
   transform: translateX(-50%);
 
-  width: min(92%, 520px);
+  width: min(92%, 320px);
+  max-width: 70%;
 
   display: flex;
   flex-wrap: wrap;
@@ -47,5 +48,6 @@ button:active {
   gap: 10px;
 
   z-index: 50;
+  padding-bottom: 1vh;
 }
 

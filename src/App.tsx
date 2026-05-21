@@ -357,8 +357,10 @@ export default function App() {
                 </SceneLayout>
               </div>
             </div>
-
-            {/* BUTTONS */}
+          </div>
+        </div>
+      </div>
+                  {/* BUTTONS */}
 
             <div className="bottom-controls">
               {phase !== "playing" && !isStarting && (
@@ -409,15 +411,12 @@ export default function App() {
                   Play
                 </Button>
               )}
-
+              <Button onClick={handleReset}>Reset</Button>
               <ControlsHint onOpenTutorial={() => setShowTutorial(true)} />
 
-              <Button onClick={handleReset}>Reset</Button>
+
 
             </div>
-          </div>
-        </div>
-      </div>
     </main>
   );
 }
