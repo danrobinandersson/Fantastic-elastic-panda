@@ -33,7 +33,8 @@ h2 {
   pointer-events: none;
   color: #f88c2f;
   font-weight: bold;
-
+  margin: 0;   /* ADD to existing h2 rule */
+  /* ...rest of existing styles */
 
     text-shadow: 
       0 .2rem 0 #a73906, 
@@ -56,8 +57,11 @@ main {
   width: 100%;
   height: 100%;
 
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;   /* keeps the pair centered vertically as a unit */
+  gap: 12px;
 }
 
 html,

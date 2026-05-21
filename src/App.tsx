@@ -21,7 +21,9 @@ import "./App.css";
 
 import { defaultSceneConfig } from "./config/sceneConfig";
 import { api } from "./api";
-import { validateAndPayout, createGameSession } from "./api/supabaseGameClient";
+import ControlsHint from "./components/ui/ControlsHint";import { validateAndPayout, createGameSession } from "./api/supabaseGameClient";
+import ResetButton from "./components/ui/ResetButton";
+
 
 export default function App() {
   /*
@@ -457,6 +459,7 @@ export default function App() {
           ========================= */}
 
           <div className="overlay-ui">
+            <div className="UI-top-row">
             {/* TIMER / HIGHSCORE BUTTON */}
 
             {phase === "playing" ? (
@@ -469,7 +472,10 @@ export default function App() {
             ) : (
               <HighscoreButton onClick={() => setShowScoreboard(true)} />
             )}
+<ResetButton onClick={handleReset} />
+          </div>
 
+          //////
             {/* TARGET WINDOW */}
 
             <div className={styles.targetWindow}>
@@ -502,8 +508,10 @@ export default function App() {
                 </SceneLayout>
               </div>
             </div>
-
-            {/* BUTTONS */}
+          </div>
+        </div>
+      </div>
+                  {/* BUTTONS */}
 
             <div className="bottom-controls">
               {phase !== "playing" && !isStarting && (
@@ -569,16 +577,11 @@ export default function App() {
                   Play
                 </Button>
               )}
+              <ControlsHint onOpenTutorial={() => setShowTutorial(true)} />
 
-              <Button onClick={() => setShowTutorial(true)} variant="secondary">
-                Tutorial
-              </Button>
 
-              <Button onClick={handleReset}>Reset</Button>
+
             </div>
-          </div>
-        </div>
-      </div>
     </main>
   );
 }
