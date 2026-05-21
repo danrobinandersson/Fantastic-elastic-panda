@@ -295,9 +295,93 @@ export default function App() {
   */
   const handleExitGame = useCallback(() => {
     setScore(null);
+    setRewardToken(null);
+    setTransactionId(0);
+    setSessionId(null);
+    setTarget({} as BlendshapeValues);
 
     exitGame();
   }, [exitGame]);
+
+  /*
+    RETURN TO TIVOLI
+  */
+  const handleReturnToTivoli = useCallback(() => {
+    // Reset all game state
+    setScore(null);
+    setRewardToken(null);
+    setTransactionId(0);
+    setSessionId(null);
+    setTarget({} as BlendshapeValues);
+    setIdentityToken(null);
+    setPlayer(null);
+
+    exitGame();
+
+    // Redirect to Tivoli (or parent app)
+    const tivoliUrl = import.meta.env.VITE_TIVOLI_REDIRECT_URL || "https://tivoli.wm.local";
+    window.location.href = tivoliUrl;
+  }, [exitGame]);
+
+  /*
+    PLAY AGAIN
+  */
+  const handlePlayAgain = useCallback(async () => {
+    // Reset per-round state
+    setScore(null);
+    setRewardToken(null);
+    setTransactionId(0);
+    setSessionId(null);
+    setTarget({} as BlendshapeValues);
+
+    if (!identityToken) {
+      setApiError("Missing identity token.");
+      return;
+    }
+
+    try {
+      setIsStarting(true);
+
+      // Create new transaction with same identity token
+      const transaction = await api.createTransaction({
+        identity_token: identityToken,
+        amount: config.price,
+      });
+
+      setTransactionId(parseInt(transaction.id, 10));
+      setRewardToken(transaction.stamp);
+
+      // Create a new Supabase session for this game
+      const sessionResult = await createGameSession(
+        identityToken,
+        blendshapesRef.current,
+      );
+
+      if (sessionResult) {
+        setSessionId(sessionResult.sessionId);
+        console.log("Game session created:", sessionResult.sessionId);
+      }
+
+      // Generate new target face
+      const newTarget = randomFace();
+      setTarget(newTarget);
+      targetRef.current = newTarget;
+
+      // Reset player face with spring effect
+      handleReset();
+
+      // Trigger target spin animation
+      setTargetSpinTrigger((v) => v + 1);
+
+      // Exit game state and start new game
+      exitGame();
+      startGame();
+    } catch (err) {
+      console.error("Play again error:", err);
+      setApiError("Could not start new game.");
+      setIsStarting(false);
+    }
+  }, [identityToken, config.price, exitGame, startGame]);
 
   /* Show tutorial on first visit */
   useEffect(() => {
@@ -323,7 +407,8 @@ export default function App() {
           score={score}
           token={rewardToken}
           config={config}
-          onExit={handleExitGame}
+          onPlayAgain={handlePlayAgain}
+          onReturnToTivoli={handleReturnToTivoli}
           onShowHighScores={() => setShowScoreboard(true)}
         />
       )}

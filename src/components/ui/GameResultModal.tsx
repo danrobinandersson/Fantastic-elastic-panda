@@ -9,7 +9,8 @@ type GameResultModalProps = {
     doubleWinThreshold: number;
     moneyBackThreshold: number;
   };
-  onExit: () => void;
+  onPlayAgain: () => void;
+  onReturnToTivoli: () => void;
   onShowHighScores: () => void;
 };
 
@@ -17,7 +18,8 @@ export default function GameResultModal({
   score,
   token,
   config,
-  onExit,
+  onPlayAgain,
+  onReturnToTivoli,
   onShowHighScores,
 }: GameResultModalProps) {
   const [displayed, setDisplayed] = useState<number | null>(null);
@@ -55,7 +57,7 @@ export default function GameResultModal({
   }
 
   return (
-    <Modal onExit={onExit} labelId="game-result-title">
+    <Modal onExit={onReturnToTivoli} labelId="game-result-title">
       <h2 id="game-result-title">Time's up!</h2>
       <p>Your score: {displayed ?? "–"}</p>
       <p>{getFeedbackMessage()}</p>
@@ -65,7 +67,8 @@ export default function GameResultModal({
         <p>Generating reward...</p>
       )}
       <Button onClick={onShowHighScores} variant="secondary">High Scores</Button>
-      <Button onClick={onExit}>Exit</Button>
+      <Button onClick={onPlayAgain}>Play Again</Button>
+      <Button onClick={onReturnToTivoli} variant="secondary">Return to Tivoli</Button>
     </Modal>
   );
 }
