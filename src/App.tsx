@@ -226,9 +226,11 @@ export default function App() {
         finalScore >= config.moneyBackThreshold
       ) {
         const payoutAmount =
-          finalScore >= config.doubleWinThreshold
-            ? config.price * 2
-            : config.price;
+          finalScore >= 98
+            ? config.price * 5     // near-perfect: 98+
+            : finalScore >= config.doubleWinThreshold
+              ? config.price * 2   // great: 93-97
+              : config.price;      // money back: 90-92
 
         console.log(`Payout calculation: score=${finalScore}, price=${config.price}, payout=${payoutAmount}`);
 
@@ -374,7 +376,7 @@ export default function App() {
 
             {phase === "playing" ? (
               <Timer
-                duration={config.timerSeconds ?? 20}
+                duration={config.timerSeconds ?? 15}
                 isRunning={phase === "playing"}
                 onComplete={handleGameComplete}
                 compact
