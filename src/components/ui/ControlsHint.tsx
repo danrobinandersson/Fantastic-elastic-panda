@@ -1,4 +1,9 @@
-import { HelpCircle, MousePointer2, Hand } from "lucide-react";
+import {
+  HelpCircle,
+  MousePointer2,
+  Pointer,
+} from "lucide-react";
+
 import styles from "./ControlsHint.module.css";
 
 type ControlsHintProps = {
@@ -14,31 +19,40 @@ export default function ControlsHint({
     typeof window !== "undefined" &&
     /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  return (
-    <div className={`${styles.wrapper} ${className}`}>
-      <div className={styles.hint}>
-        {/* <span className={styles.arrow}>←</span> */}
+  const Icon = isMobile ? Pointer : MousePointer2;
 
-        <div className={styles.icon}>
-          {isMobile ? (
-            <Hand size={24} strokeWidth={2.5} />
-          ) : (
-            <MousePointer2 size={24} strokeWidth={2.5} />
-          )}
+  return (
+    <div className={`${styles.hint} ${className}`}>
+      <div className={styles.svgWrapper}>
+        {/* LEFT SPACER */}
+        <div className={styles.sideSpacer} />
+
+        {/* CENTER */}
+        <div className={styles.centerIcons}>
+          <span className={styles.arrow}>←</span>
+
+          <Icon
+            className={styles.pointer}
+            strokeWidth={2.5}
+          />
+
+          <span className={styles.arrow}>→</span>
         </div>
 
-        <span className={styles.text}>Drag to match</span>
-
-        {/* <span className={styles.arrow}>→</span> */}
+        {/* RIGHT */}
+        <button
+          className={styles.helpButton}
+          onClick={onOpenTutorial}
+          aria-label="Open tutorial"
+        >
+          <HelpCircle strokeWidth={2} />
+        </button>
       </div>
 
-      <button
-        className={styles.helpButton}
-        onClick={onOpenTutorial}
-        aria-label="Open tutorial"
-      >
-        <HelpCircle size={22} strokeWidth={2.5} />
-      </button>
+      <p className={styles.text}>
+        Drag the face using your{" "}
+        {isMobile ? "finger" : "mouse cursor"}
+      </p>
     </div>
   );
 }

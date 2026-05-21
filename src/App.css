@@ -33,7 +33,7 @@ button:active {
 .bottom-controls {
   position: absolute;
 
-  bottom: max(18px, env(safe-area-inset-bottom));
+  bottom: max(4px, env(safe-area-inset-bottom));
   left: 50%;
 
   transform: translateX(-50%);
