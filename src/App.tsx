@@ -24,6 +24,8 @@ import { defaultSceneConfig } from "./config/sceneConfig";
 import { api } from "./api";
 import ControlsHint from "./components/ui/ControlsHint";
 import ScoreboardModal from "./components/ui/ScoreboardModal";
+import ResetButton from "./components/ui/ResetButton";
+
 
 export default function App() {
   /*
@@ -325,9 +327,10 @@ export default function App() {
             ) : (
               <HighscoreButton onClick={() => setShowScoreboard(true)} />
             )}
-                          <Button onClick={handleReset}>Reset</Button>
-
+<ResetButton onClick={handleReset} />
           </div>
+
+          //////
             {/* TARGET WINDOW */}
 
             <div className={styles.targetWindow}>

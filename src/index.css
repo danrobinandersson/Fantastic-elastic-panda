@@ -33,7 +33,8 @@ h2 {
   pointer-events: none;
   color: #f88c2f;
   font-weight: bold;
-
+  margin: 0;   /* ADD to existing h2 rule */
+  /* ...rest of existing styles */
 
     text-shadow: 
       0 .2rem 0 #a73906, 

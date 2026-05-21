@@ -1,19 +1,14 @@
 .hint {
-  /*
-    Responsive scale
-    (valid CSS math)
-  */
---scale: clamp(0.72, 0.9, 1);
-  width: min(90vw, 420px);
+  --scale: clamp(0.72, 0.8, 1);
+
+  /* % of parent (bottom-controls), not full viewport width */
+  width: min(100%, 320px);
 
   display: flex;
   flex-direction: column;
-  padding:
-    calc(var(--scale) * 5px)
-    calc(var(--scale) * 5px);
+  padding: 8px 10px;
 
-  border-radius: calc(var(--scale) * 22px);
-
+  border-radius: 20px;
   overflow: hidden;
 
   background: radial-gradient(
@@ -31,7 +26,6 @@
     0px -2px #6539a7,
     0 12px 30px rgba(0, 0, 0, 0.28);
 }
-
 
 .svgWrapper {
   display: grid;
