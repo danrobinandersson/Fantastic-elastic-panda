@@ -49,12 +49,23 @@ export default function GameResultModal({
     return () => cancelAnimationFrame(raf);
   }, [score]);
 
-  function getFeedbackMessage() {
-    if (score === null) return "";
-    if (score >= config.doubleWinThreshold) return "Amazing! Double win!";
-    if (score >= config.moneyBackThreshold) return "Nice! You got your money back!";
-    return "Better luck next time!";
+function getFeedbackMessage() {
+  if (score === null) return "";
+
+  if (score >= 95) {
+    return "LEGENDARY! 5x payout!";
   }
+
+  if (score >= 90) {
+    return "Amazing! Double win!";
+  }
+
+  if (score >= 85) {
+    return "Nice! You got your money back!";
+  }
+
+  return "Better luck next time!";
+}
 
   return (
     <Modal onExit={onReturnToTivoli} labelId="game-result-title">
