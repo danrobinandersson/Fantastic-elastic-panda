@@ -17,7 +17,6 @@ export interface IdentityTokenResponse {
 export interface CreateTransactionRequest {
   identity_token: string;
   amount: number;
-  amusement_uuid: UUID;
 }
 
 export interface TransactionReceipt {

@@ -1,59 +1,51 @@
 import type {
-  IdentityTokenResponse,
   TivoliApi,
-  TransactionReceipt,
+  IdentityTokenResponse,
   CreateTransactionRequest,
+  TransactionReceipt,
   PayoutRequest,
   UUID,
 } from "./types";
 
-const DIRECT_API_BASE = import.meta.env.VITE_CENTRALBANK_API_URL;
-const PROXY_BASE = import.meta.env.VITE_TIVOLI_PROXY_BASE; // e.g. "/tivoli" or "http://localhost:3001/tivoli"
-
-// If a proxy base is provided, use it (frontend will call our server-side proxy).
-const API_BASE_URL = PROXY_BASE ?? DIRECT_API_BASE;
-
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-  });
-
-  if (!response.ok) {
-    throw {
-      message: `Request failed with status ${response.status}`,
-      status: response.status,
-    };
-  }
-
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
-  return response.json() as Promise<T>;
-}
+const BASE_URL = import.meta.env.VITE_CENTRALBANK_API_URL;
+const API_KEY = import.meta.env.VITE_TIVOLI_API_KEY;
 
 export const tivoliApi: TivoliApi = {
-  getIdentity(token: string): Promise<IdentityTokenResponse> {
-    return request<IdentityTokenResponse>(`/identity-tokens/${token}`);
+  async getIdentity(token: string): Promise<IdentityTokenResponse> {
+    const res = await fetch(`${BASE_URL}/identity-tokens/${token}`);
+    if (!res.ok) throw new Error("Failed to fetch identity");
+    return res.json();
   },
 
-  createTransaction(
-    requestBody: CreateTransactionRequest,
+  async createTransaction(
+    request: CreateTransactionRequest,
   ): Promise<TransactionReceipt> {
-    return request<TransactionReceipt>("/transactions", {
+    const res = await fetch(`${BASE_URL}/transactions`, {
       method: "POST",
-      body: JSON.stringify(requestBody),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...request,
+        api_key: API_KEY,
+      }),
     });
+    if (!res.ok) throw new Error("Failed to create transaction");
+    return res.json();
   },
 
-  payOut(transactionId: UUID, requestBody: PayoutRequest): Promise<void> {
-    return request<void>(`/transactions/${transactionId}/payout`, {
-      method: "POST",
-      body: JSON.stringify(requestBody),
-    });
+  async payOut(transactionId: UUID, request: PayoutRequest): Promise<void> {
+    const res = await fetch(
+      `${BASE_URL}/transactions/${transactionId}/payout`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...request,
+          api_key: API_KEY,
+        }),
+      },
+    );
+    if (!res.ok) throw new Error("Failed to payout");
   },
 };
