@@ -312,6 +312,7 @@ export default function App() {
           ========================= */}
 
           <div className="overlay-ui">
+            <div className="UI-top-row">
             {/* TIMER / HIGHSCORE BUTTON */}
 
             {phase === "playing" ? (
@@ -324,7 +325,9 @@ export default function App() {
             ) : (
               <HighscoreButton onClick={() => setShowScoreboard(true)} />
             )}
+                          <Button onClick={handleReset}>Reset</Button>
 
+          </div>
             {/* TARGET WINDOW */}
 
             <div className={styles.targetWindow}>
@@ -411,7 +414,6 @@ export default function App() {
                   Play
                 </Button>
               )}
-              <Button onClick={handleReset}>Reset</Button>
               <ControlsHint onOpenTutorial={() => setShowTutorial(true)} />
 
 
