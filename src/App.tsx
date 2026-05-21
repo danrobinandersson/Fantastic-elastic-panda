@@ -24,6 +24,13 @@ import { defaultSceneConfig } from "./config/sceneConfig";
 import { api } from "./api";
 import { validateAndPayout, createGameSession } from "./api/supabaseGameClient";
 
+// Payout calculation based on score
+const calculatePayout = (score: number, price: number): number => {
+  if (score >= 98) return price * 5;   // near-perfect match
+  if (score >= 93) return price * 2;   // great match
+  if (score >= 90) return price * 1;   // money back
+  return 0;                            // no payout
+};
 
 export default function App() {
   /*
@@ -121,7 +128,6 @@ export default function App() {
     SCORE
   */
   const [score, setScore] = useState<number | null>(null);
-  const [validatedScore, setValidatedScore] = useState<number | null>(null);
 
   /*
     REWARD TOKEN
@@ -220,11 +226,12 @@ export default function App() {
 
       console.log("Final score:", finalScore);
 
-      // Call Supabase Edge Function for validated payout
-      if (sessionId && identityToken && finalScore >= config.moneyBackThreshold) {
-        const payoutAmount =
-          finalScore >= config.doubleWinThreshold ? config.price * 2 : config.price;
+      // Calculate payout based on score
+      const payoutAmount = calculatePayout(finalScore, config.price);
+      console.log(`Payout calculation: score=${finalScore}, price=${config.price}, payout=${payoutAmount}`);
 
+      // Call Supabase Edge Function for validated payout
+      if (sessionId && identityToken && payoutAmount > 0) {
         try {
           console.log("Calling validateAndPayout with:", {
             sessionId,
@@ -255,13 +262,18 @@ export default function App() {
           } else {
             const serverScore = result.data?.validatedScore;
             console.log("Payout successful. Validated score:", serverScore);
-            if (serverScore !== undefined) {
-              setValidatedScore(serverScore);
+            if (result.data?.payoutSuccess) {
+              setRewardToken(`💰 +€${payoutAmount.toFixed(2)}`);
             }
           }
         } catch (err) {
           console.error("Edge Function call error", err);
+          setRewardToken("Payment processing...");
         }
+      } else if (!sessionId || !identityToken) {
+        console.warn("Missing session or identity token for payout");
+      } else {
+        console.log("No payout (score below threshold)");
       }
 
       console.log("Payout complete");
