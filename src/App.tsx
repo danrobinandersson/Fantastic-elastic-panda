@@ -7,7 +7,6 @@ import { randomFace, scoreMatch } from "./utils/faceUtils";
 import type { BlendshapeValues } from "./types/blendshape";
 import { SceneLayout } from "./components/scene/SceneLayout";
 
-
 import Timer from "./components/ui/Timer";
 import Button from "./components/ui/Button";
 import HighscoreButton from "./components/ui/HighscoreButton";
@@ -23,7 +22,6 @@ import "./App.css";
 import { defaultSceneConfig } from "./config/sceneConfig";
 import { api } from "./api";
 import { validateAndPayout, createGameSession } from "./api/supabaseGameClient";
-
 
 export default function App() {
   /*
@@ -60,16 +58,18 @@ export default function App() {
 
         if (!tokenFromUrl) {
           setApiError("No identity token found. Using mock player.");
-          
+
           // Use mock identity if VITE_USE_MOCK_API is true
           if (import.meta.env.VITE_USE_MOCK_API === "true") {
-            const mockIdentity = { user: { id: "mock-user", name: "Test Player" } };
+            const mockIdentity = {
+              user: { id: "mock-user", name: "Test Player" },
+            };
             setPlayer(mockIdentity.user);
             // Generate unique mock token for each session (to satisfy UNIQUE constraint on identity_token)
             setIdentityToken(`mock-token-${crypto.randomUUID()}`);
             return;
           }
-          
+
           // Otherwise try to get a real identity with mock token (for testing)
           const identity = await api.getIdentity("mock-token");
 
@@ -221,9 +221,15 @@ export default function App() {
       console.log("Final score:", finalScore);
 
       // Call Supabase Edge Function for validated payout
-      if (sessionId && identityToken && finalScore >= config.moneyBackThreshold) {
+      if (
+        sessionId &&
+        identityToken &&
+        finalScore >= config.moneyBackThreshold
+      ) {
         const payoutAmount =
-          finalScore >= config.doubleWinThreshold ? config.price * 2 : config.price;
+          finalScore >= config.doubleWinThreshold
+            ? config.price * 2
+            : config.price;
 
         try {
           console.log("Calling validateAndPayout with:", {
@@ -249,8 +255,14 @@ export default function App() {
           if (result.error) {
             console.error("Edge Function error:", result.error);
             // Check if it's a rate limit error object
-            if (typeof result.error === "object" && "remainingRequests" in result.error) {
-              console.warn("Rate limited. Remaining requests:", result.error.remainingRequests);
+            if (
+              typeof result.error === "object" &&
+              "remainingRequests" in result.error
+            ) {
+              console.warn(
+                "Rate limited. Remaining requests:",
+                result.error.remainingRequests,
+              );
             }
           } else {
             const serverScore = result.data?.validatedScore;
@@ -408,7 +420,9 @@ export default function App() {
               {phase !== "playing" && !isStarting && (
                 <Button
                   onClick={async () => {
-                    {handleReset()}
+                    {
+                      handleReset();
+                    }
 
                     if (showTutorial) {
                       setShowTutorial(true);
@@ -428,7 +442,6 @@ export default function App() {
                       const transaction = await api.createTransaction({
                         identity_token: identityToken,
                         amount: config.price,
-                        amusement_uuid: import.meta.env.VITE_AMUSEMENT_UUID,
                       });
 
                       setTransactionId(parseInt(transaction.id, 10));
@@ -439,10 +452,13 @@ export default function App() {
                         identityToken,
                         blendshapesRef.current,
                       );
-                      
+
                       if (sessionResult) {
                         setSessionId(sessionResult.sessionId);
-                        console.log("Game session created:", sessionResult.sessionId);
+                        console.log(
+                          "Game session created:",
+                          sessionResult.sessionId,
+                        );
                       }
 
                       const newTarget = randomFace();
@@ -470,7 +486,6 @@ export default function App() {
               </Button>
 
               <Button onClick={handleReset}>Reset</Button>
-
             </div>
           </div>
         </div>
