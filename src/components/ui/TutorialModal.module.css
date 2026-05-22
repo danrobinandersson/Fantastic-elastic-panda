@@ -1,8 +1,12 @@
 .slidesWrapper {
   width: 100%;
-  overflow: hidden;
-}
 
+  overflow: hidden;
+
+  flex: 1;
+
+  min-height: 0;
+}
 .track {
   display: flex;
   transition: transform 300ms ease;

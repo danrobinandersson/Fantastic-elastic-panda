@@ -16,17 +16,23 @@ export default function Modal({ onExit, labelId, children }: ModalProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onExit]);
 
-  return (
-    <div className={styles.backdrop} onClick={onExit}>
-      <div
-        className={styles.modal}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={labelId}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {children}
-      </div>
+return (
+  <div className={styles.backdrop} onClick={onExit}>
+    <div
+      className={styles.modal}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={labelId}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <img
+        src="/Modal_BG.webp"
+        className={styles.bg}
+        alt=""
+      />
+
+      {children}
     </div>
-  );
+  </div>
+);
 }
