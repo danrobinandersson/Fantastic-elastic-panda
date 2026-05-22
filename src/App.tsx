@@ -219,6 +219,8 @@ export default function App() {
 
       setScore(finalScore);
 
+      await saveScore(finalScore);
+
       console.log("Final score:", finalScore);
 
       // Call Supabase Edge Function for validated payout
@@ -290,9 +292,28 @@ export default function App() {
       setFreezeControls(false);
       finalizeTimeoutRef.current = null;
     }, 600);
-  }, [finishGame, transactionId, identityToken, sessionId, config]);
+  }, [finishGame, transactionId, identityToken, sessionId, config, player]);
 
   /* Scoreboard */
+
+  async function saveScore(finalScore: number) {
+    if (!player) {
+      console.error("No player found, cannot save score");
+      return;
+    }
+
+    await fetch("http://localhost:3001/scores", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        centralbankUserId: String(player.id),
+        playerName: player.name,
+        score: finalScore,
+      }),
+    });
+  }
 
   /*
     EXIT GAME
