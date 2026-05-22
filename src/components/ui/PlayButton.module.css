@@ -1,0 +1,106 @@
+.playButton {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.35rem;
+
+  cursor: pointer;
+  border: none;
+
+  padding: clamp(10px, 1.4vw, 16px) clamp(18px, 2vw, 24px);
+  border-radius: clamp(14px, 2.4vw, 20px);
+
+  background: linear-gradient(180deg, #f78019 10%, #cb5c13 60%, #7a2e0a 90%);
+  color: white;
+
+  box-shadow:
+    inset 1px 0px rgba(207, 101, 8, 0.9),
+    inset 0px -1px rgba(102, 49, 0, 0.9),
+    0px 8px rgba(61, 11, 0, 0.9),
+    0px -2px rgba(255, 164, 80, 0.9),
+    0 12px 30px rgba(0, 0, 0, 0.28);
+
+  min-width: 140px;
+
+  animation: popIn 420ms cubic-bezier(.2, 1.3, .2, 1);
+  transform-origin: center;
+
+  transition:
+    filter 0.15s ease,
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.playButton:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.playButton:active:not(:disabled) {
+  transform: scale(0.96);
+  filter: brightness(0.95);
+}
+
+.playButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.title {
+  margin: 0;
+
+  text-transform: uppercase;
+
+  font-size: clamp(1.2rem, 2.5vw, 1.7rem);
+  line-height: 1;
+  font-weight: 800;
+}
+
+.costRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.costText {
+  margin: 0;
+
+  text-transform: uppercase;
+
+  font-size: clamp(0.72rem, 1.4vw, 0.92rem);
+  font-weight: 600;
+  opacity: 0.92;
+}
+
+.coinIcon {
+  width: 0.95rem;
+  height: 0.95rem;
+
+  flex-shrink: 0;
+
+  color: #ffd54a;
+
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+
+  85% {
+    transform: scale(0.98);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}

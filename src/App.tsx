@@ -6,9 +6,8 @@ import { FaceControls } from "./components/controls/FaceControls";
 import { randomFace, scoreMatch } from "./utils/faceUtils";
 import type { BlendshapeValues } from "./types/blendshape";
 import { SceneLayout } from "./components/scene/SceneLayout";
-
+import PlayButton from "./components/ui/PlayButton";
 import Timer from "./components/ui/Timer";
-import Button from "./components/ui/Button";
 import HighscoreButton from "./components/ui/HighscoreButton";
 import GameResultModal from "./components/ui/GameResultModal";
 import ScoreboardModal from "./components/ui/ScoreboardModal";
@@ -524,73 +523,71 @@ export default function App() {
 
       <div className="bottom-controls">
         {phase !== "playing" && !isStarting && (
-          <Button
-            onClick={async () => {
-              {
-                handleReset();
-              }
+         <PlayButton
+  disabled={isStarting}
+  cost={config.price}
+  onClick={async () => {
+    handleReset();
 
-              if (showTutorial) {
-                setShowTutorial(true);
-                return;
-              }
+    if (showTutorial) {
+      setShowTutorial(true);
+      return;
+    }
 
-              if (isStarting) return;
+    if (isStarting) return;
 
-              if (!identityToken) {
-                setApiError("Missing identity token.");
-                return;
-              }
+    if (!identityToken) {
+      setApiError("Missing identity token.");
+      return;
+    }
 
-              try {
-                setIsStarting(true);
+    try {
+      setIsStarting(true);
 
-                const transaction = await api.createTransaction({
-                  identity_token: identityToken,
-                  amount: config.price,
-                });
+      const transaction = await api.createTransaction({
+        identity_token: identityToken,
+        amount: config.price,
+      });
 
-                setTransactionId(transaction.transaction_id);
+      setTransactionId(transaction.transaction_id);
 
-                if (transaction.stamp) {
-                  const stampText = transaction.stamp.metal
-                    ? `${transaction.stamp.metal} ${transaction.stamp.animal}`
-                    : transaction.stamp.animal;
+      if (transaction.stamp) {
+        const stampText = transaction.stamp.metal
+          ? `${transaction.stamp.metal} ${transaction.stamp.animal}`
+          : transaction.stamp.animal;
 
-                  setRewardToken(stampText);
-                } else {
-                  setRewardToken("No stamp this round");
-                }
-                // Create a Supabase session for this game
-                const sessionResult = await createGameSession(
-                  identityToken,
-                  blendshapesRef.current,
-                );
+        setRewardToken(stampText);
+      } else {
+        setRewardToken("No stamp this round");
+      }
 
-                if (sessionResult) {
-                  setSessionId(sessionResult.sessionId);
-                  console.log("Game session created:", sessionResult.sessionId);
-                }
+      const sessionResult = await createGameSession(
+        identityToken,
+        blendshapesRef.current,
+      );
 
-                const newTarget = randomFace();
+      if (sessionResult) {
+        setSessionId(sessionResult.sessionId);
+        console.log("Game session created:", sessionResult.sessionId);
+      }
 
-                setTarget(newTarget);
-                targetRef.current = newTarget;
+      const newTarget = randomFace();
 
-                setScore(null);
-                setTargetSpinTrigger((v) => v + 1);
+      setTarget(newTarget);
+      targetRef.current = newTarget;
 
-                startGame();
-                setIsStarting(false);
-              } catch (err) {
-                console.error("Transaction/create error", err);
-                setApiError("Could not create transaction.");
-                setIsStarting(false);
-              }
-            }}
-          >
-            Play
-          </Button>
+      setScore(null);
+      setTargetSpinTrigger((v) => v + 1);
+
+      startGame();
+      setIsStarting(false);
+    } catch (err) {
+      console.error("Transaction/create error", err);
+      setApiError("Could not create transaction.");
+      setIsStarting(false);
+    }
+  }}
+/>
         )}
         <ControlsHint onOpenTutorial={() => setShowTutorial(true)} />
       </div>
