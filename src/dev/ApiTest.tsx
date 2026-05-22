@@ -44,12 +44,18 @@ export function ApiTest() {
       const receipt = await api.createTransaction({
         identity_token: token,
         amount: 5,
-        amusement_uuid: import.meta.env.VITE_AMUSEMENT_UUID,
       });
 
       console.log('[ApiTest] Transaction created:', receipt);
-      setStamp(receipt.stamp);
-    } catch (err) {
+if (receipt.stamp) {
+  const stampText = receipt.stamp.metal
+    ? `${receipt.stamp.metal} ${receipt.stamp.animal}`
+    : receipt.stamp.animal;
+
+  setStamp(stampText);
+} else {
+  setStamp("No stamp");
+}    } catch (err) {
       console.error('[ApiTest] Transaction failed:', err);
       setError("Transaction failed. Try again from Tivoli.");
     }

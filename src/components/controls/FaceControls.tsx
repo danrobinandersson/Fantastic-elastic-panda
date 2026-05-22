@@ -96,19 +96,26 @@ export const FaceControls: React.FC<FaceControlsProps> = ({
   }, [blendshapes, wrapperSize])
 
   return (
-    <div ref={wrapperRef} style={{ position: 'absolute', inset: 0, pointerEvents: disabled ? 'none' : 'none' }}>
-      {CONTROL_ZONES.map((zone: ControlZone) => (
-        <DragZone
-          key={zone.id}
-          zone={zone}
-          onDragStart={disabled ? undefined : startDrag}
-          onDrag={disabled ? undefined : applyDrag}
-          onRelease={disabled ? undefined : (() => {})}
-          style={{
-            ...getZoneStyle(zone),
-            pointerEvents: disabled ? 'none' : 'auto',
-          }}
-        />
+<div
+  ref={wrapperRef}
+  style={{
+    position: 'absolute',
+    inset: 0,
+    pointerEvents: disabled ? 'none' : 'auto',
+  }}
+>      
+{CONTROL_ZONES.map((zone: ControlZone) => (
+<DragZone
+  key={zone.id}
+  zone={zone}
+  onDragStart={startDrag}
+  onDrag={applyDrag}
+  onRelease={() => {}}
+  style={{
+    ...getZoneStyle(zone),
+    pointerEvents: disabled ? 'none' : 'auto',
+  }}
+/>
       ))}
     </div>
   )

@@ -31,22 +31,18 @@ export default function App() {
     GAME STORE
   */
   const phase = useGameStore((state) => state.phase);
-
   const config = useGameStore((state) => state.config);
-
   const startGame = useGameStore((state) => state.startGame);
-
   const finishGame = useGameStore((state) => state.finishGame);
-
   const exitGame = useGameStore((state) => state.exitGame);
 
   /* Add player / token / transaction state */
 
   const [identityToken, setIdentityToken] = useState<string | null>(null);
-  const [player, setPlayer] = useState<IdentityUser | null>(null);
+  const [_player, setPlayer] = useState<IdentityUser | null>(null);
   const [transactionId, setTransactionId] = useState<number>(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [_apiError, setApiError] = useState<string | null>(null);
 
   /* Read identity token when app loads */
   useEffect(() => {
@@ -295,7 +291,7 @@ export default function App() {
 
   /*
     EXIT GAME
-  */
+
   const handleExitGame = useCallback(() => {
     setScore(null);
     setRewardToken(null);
@@ -305,6 +301,7 @@ export default function App() {
 
     exitGame();
   }, [exitGame]);
+    */
 
   /*
     RETURN TO TIVOLI
