@@ -78,7 +78,7 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
 
 <mesh
   geometry={nodes.EyeR.geometry}
-  position={[32, 13.7448, -24.33]}
+  position={[31, 14, -24]}
   material={materials.Panda}
   scale={[1, 1, 1]}
 
@@ -86,7 +86,7 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
 
 <mesh
   geometry={nodes.EyeL.geometry}
-  position={[-32, 13.7448, -24.33]}
+  position={[-31, 14, -24]}
   material={materials.Panda}
   scale={[1, 1, 1]}
 />
