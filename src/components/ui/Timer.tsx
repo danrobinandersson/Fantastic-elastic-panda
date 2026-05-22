@@ -39,7 +39,7 @@ export default function Timer({ duration, isRunning, onComplete }: TimerProps) {
       <div className={styles.timerContainerCompact}>
         <img
           className={styles.clockIcon}
-          src="/src/assets/icons/clock-icon.svg"
+          src="/clock-icon.svg"
           alt="Timer"
         />
 
@@ -54,7 +54,7 @@ export default function Timer({ duration, isRunning, onComplete }: TimerProps) {
     <div className={styles.timerContainer}>
       <img
         className={styles.clockIcon}
-        src="/src/assets/icons/clock-icon.svg"
+        src="/clock-icon.svg"
         alt="Timer"
       />
 
