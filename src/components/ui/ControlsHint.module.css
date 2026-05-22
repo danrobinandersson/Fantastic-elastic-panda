@@ -54,8 +54,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: calc(var(--scale) * 20px);
 
-  gap: calc(var(--scale) * 5px);
+
+}
+
+@keyframes iconMove {
+  0%   {transform: translateX(0rem);}
+  25%  {transform: translateX(10px);}
+  50%  {transform: translateX(0rem);}
+  75% {transform: translateX(-10px);}
+  100%  {transform: translateX(0rem);}
+  
 }
 
 .pointer {
@@ -64,7 +74,9 @@
 
   color: #ffe0b8;
 
-  flex-shrink: 0;
+    animation-name: iconMove;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
 }
 
 .arrow {

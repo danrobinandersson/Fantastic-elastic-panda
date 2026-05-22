@@ -12,55 +12,43 @@
 
   z-index: 100;
 }
-
 .modal {
   position: relative;
-
+  isolation: isolate;
   overflow: hidden;
 
   border-radius: 1rem;
 
-  width: min(92%, 800px);
-
+  width: min(96vw, 1040px);
+  height: min(88svh, 585px);
   min-width: 280px;
-  max-width: 800px;
 
-  max-height: 90svh;
-
+  aspect-ratio: 16 / 9;
   box-sizing: border-box;
 
   display: flex;
   flex-direction: column;
-
   align-items: center;
-
   text-align: center;
+  justify-content: space-between;
 
   container-type: inline-size;
 
-  padding:
-    8cqi
-    5cqi
-    5cqi;
+  padding: clamp(1.25rem, 3cqi, 2.5rem)
+           clamp(1.5rem, 3cqi, 2.5rem)
+           clamp(1.25rem, 3cqi, 2rem);
 
-  gap: 2cqi;
+  gap: 1rem;
 }
-
 .modal h2 {
-  position: absolute;
-
-  top: 4cqi;
-
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
+  top: auto;
 
   margin: 0;
 
-  z-index: 3;
-
-  font-size: 9cqi;
-
-  white-space: nowrap;
+  font-size: clamp(2rem, 5cqi, 3.5rem);
+  line-height: 0.95;
+  z-index: 2;
 
   pointer-events: none;
 }
@@ -69,20 +57,23 @@
 .bg {
   position: absolute;
   inset: 0;
+
   width: 100%;
   height: 100%;
 
   object-fit: contain;
+  object-position: center;
 
-  z-index: 0;
+  z-index: -1;
+  border-radius: inherit;
 
   pointer-events: none;
   user-select: none;
 }
 /* CONTENT ABOVE IMAGE */
-.modal > *:not(.bg):not(h2) {
+.modal > *:not(.bg) {
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
 .modal p {
@@ -101,31 +92,61 @@
 
 
 .modal button {
-  font-size: 2cqi;
-
-  padding: 0.8cqi 3cqi;
-
-  margin-top: 0;
+  font-size: clamp(0.65rem, 0.9vw, 0.85rem);
+  padding: clamp(0.3rem, 0.5vw, 0.45rem)
+           clamp(0.8rem, 1.2vw, 1.15rem);
 }
 
-/* MOBILE */
-@media (max-width: 480px), (max-height: 400px) {
+
+@media (max-width: 900px) and (min-width: 481px) {
   .modal {
+    width: min(92vw, 620px);
+    height: min(90svh, 720px);
+    width: max(500px);
     aspect-ratio: 9 / 16;
 
-    width: calc(100% - 32px);
-    max-width: 420px;
-
-    max-height: 90svh;
-
-    overflow-y: auto;
-
-    padding: 1.25rem;
+    padding: 4rem 2rem 2rem;
   }
 
   .bg {
     content: url("/Modal_BG_Vertical.webp");
+    object-fit: contain;
+  }
 
-    object-fit: cover;
+  .modal button {
+    font-size: clamp(0.75rem, 1.8vw, 1rem);
+    padding: 0.35rem 0.9rem;
+  }
+}
+
+
+
+
+/* MOBILE */
+@media (max-width: 480px), (max-height: 400px) {
+  .modal {
+    /* width: min(calc(100vw - 24px), 420px); */
+    height: min(94svh, 680px);
+
+    aspect-ratio: 9 / 16;
+    padding: 4rem 2rem 2rem;
+  }
+
+  .bg {
+    content: url("/Modal_BG_Vertical.webp");
+    object-fit: contain;
+  }
+
+ .modal h2 {
+    position: absolute;
+    top: clamp(0.7rem, 3.5svh, 1.5rem);
+
+    font-size: clamp(2.4rem, 10vw, 3.7rem);
+    line-height: 0.9;
+  }
+
+  .modal button {
+    font-size: clamp(0.7rem, 3.2vw, 0.95rem);
+    padding: 0.35rem 0.9rem;
   }
 }

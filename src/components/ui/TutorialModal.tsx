@@ -14,8 +14,26 @@ const SLIDES = [
       "Match the target panda’s expression before time runs out. You have one chance per round — try to get as close as possible!",
   },
   {
-    title: "Controls",
-    content: "Drag the panda’s face using your finger or mouse to match the target expression.",
+      title: "Controls",
+    content: (
+      <>
+        <p>
+          Drag the panda’s face using your finger or mouse to match the target
+          expression.
+        </p>
+
+        <video
+          id="tutorial-control"
+          autoPlay
+          muted
+          playsInline
+          loop
+          className={styles.video}
+        >
+          <source src="/tutorial_control.webm" type="video/webm" />
+        </video>
+      </>
+    ),
   },
   {
     title: "Scoring",
@@ -43,8 +61,7 @@ export default function TutorialModal({ onClose }: TutorialModalProps) {
   }, [onClose]);
 
   return (
-    <Modal onExit={onClose} labelId="tutorial-title">
-      <h2 id="tutorial-title">Tutorial</h2>
+    <Modal onExit={onClose}>
 
       <div className={styles.slidesWrapper}>
         <div
