@@ -9,7 +9,7 @@
 
 export interface ValidatePayoutRequest {
   sessionId: string;
-  identityToken: string;
+  _identityToken: string;
   playerBlendshapes: Record<string, number>;
   targetBlendshapes: Record<string, number>;
   tivoliTransactionId: number;
@@ -130,8 +130,8 @@ export async function validateAndPayout(
  * Call this when the game starts (after receiving identity token)
  */
 export async function createGameSession(
-  identityToken: string,
-  initialBlendshapes: Record<string, number>,
+  _identityToken: string,
+  _initialBlendshapes: Record<string, number>,
 ): Promise<{ sessionId: string } | null> {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     console.warn("Supabase not configured. Session creation disabled.");

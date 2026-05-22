@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 type GameResultModalProps = {
   score: number | null;
   token: string | null;
-  _config: {
+  config: {
     doubleWinThreshold: number;
     moneyBackThreshold: number;
   };
@@ -17,7 +17,7 @@ type GameResultModalProps = {
 export default function GameResultModal({
   score,
   token,
-  _config,
+  config: _config,
   onPlayAgain,
   onReturnToTivoli,
   onShowHighScores,
