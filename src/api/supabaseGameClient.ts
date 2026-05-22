@@ -9,7 +9,7 @@
 
 export interface ValidatePayoutRequest {
   sessionId: string;
-  _identityToken: string;
+  identityToken: string;
   playerBlendshapes: Record<string, number>;
   targetBlendshapes: Record<string, number>;
   tivoliTransactionId: number;
