@@ -79,7 +79,13 @@ function getFeedbackMessage() {
       )}
       <Button onClick={onShowHighScores} variant="secondary">High Scores</Button>
       <Button onClick={onPlayAgain}>Play Again</Button>
-      <Button onClick={onReturnToTivoli} variant="secondary">Return to Tivoli</Button>
+  <Button
+        onClick={() =>
+          window.parent.postMessage({ type: "AMUSEMENT_CLOSE" }, "")
+        }
+      >
+        Back to Loopland
+      </Button>
     </Modal>
   );
 }
