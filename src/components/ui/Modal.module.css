@@ -13,7 +13,7 @@
 }
 
 .modal {
-  background-image: url("/Modal_BG.png");
+  background-image: url("/Modal_BG.webp");
   background-position: center center;
   background-repeat: no-repeat;
   background-size: auto 120%;
@@ -75,7 +75,7 @@
    viewport is too short for a 16:9 modal to fit comfortably */
 @media (max-width: 480px), (max-height: 400px) {
   .modal {
-    background-image: url("/Modal_BG_Vertical.png");
+    background-image: url("/Modal_BG_Vertical.webp");
     aspect-ratio: 9 / 16;
     padding: 1.25rem;
     width: calc(100% - 32px);
