@@ -1,0 +1,89 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  /* Removed width: 100vw — inset: 0 already covers it,
+     and 100vw causes a horizontal scrollbar when there's a scrollbar visible */
+}
+
+.modal {
+  background-image: url("/Modal_BG.png");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: auto 120%;
+  /* FIX 1: clip the background image to the border-radius box */
+  overflow: hidden;
+  color: var(--color-black);
+  padding: 2rem;
+  border-radius: 1rem;
+  text-align: center;
+  min-width: 280px;
+  max-width: 800px;
+  width: min(92%, 800px);
+  aspect-ratio: 16 / 9;
+  /* FIX 2: prevent clipping on short/wide viewports */
+  max-height: 90svh;
+  box-sizing: border-box;
+  /* FIX 3: center content within the aspect-ratio box */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+    container-type: inline-size; /* enables cqi units for children */
+  padding: 3cqi 5cqi;   /* was 5cqi — less vertical breathing room */
+  gap: 2.0cqi;
+}
+
+.modal p {
+  color: white;
+  font-size: 4cqi;
+  margin: 0;  /* remove default browser paragraph margins */
+  text-shadow:
+    0px 1px 0 #000,
+    0px 2px 0 #000000,
+    0px 2px 6px rgba(0, 0, 0, 1);
+}
+
+.modal h2 {
+  position: absolute;
+  top: 10%;
+  pointer-events: none;
+  font-size: 9cqi;
+  font-weight: bold;
+  margin: 0;  /* same fix for h2 */
+
+}
+
+.modal button {
+  font-size: 2cqi;
+  padding: 0.8cqi 3cqi;
+  margin-top: 0;
+}
+
+.modal > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* FIX 4: tighter breakpoint — triggers on narrow screens OR when the
+   viewport is too short for a 16:9 modal to fit comfortably */
+@media (max-width: 480px), (max-height: 400px) {
+  .modal {
+    background-image: url("/Modal_BG_Vertical.png");
+    aspect-ratio: 9 / 16;
+    padding: 1.25rem;
+    width: calc(100% - 32px);
+    max-width: 420px;
+    /* On very short screens (e.g. landscape phone), drop aspect-ratio
+       so the modal doesn't overflow — let it shrink to fit */
+    max-height: 90svh;
+    background-size: 120% auto;
+    overflow-y: auto;
+  }
+}

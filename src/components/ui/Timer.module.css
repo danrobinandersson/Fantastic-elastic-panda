@@ -1,10 +1,15 @@
 .timer {
-  font-size: 1rem;
   font-weight: 600;
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
   color: var(--color-gold-main);
+  line-height: 1;
+  min-width: 2ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+
+  /* BIG: fills most of the box */
+  font-size: clamp(1.6rem, 5vw, 2.8rem);
 }
 
 .warning {
@@ -13,20 +18,25 @@
 }
 
 @keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
-  50% {
-    transform: scale(1.15);
-    opacity: 0.6;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+/* Common badge/window appearance to match target window */
+.badgeCommon {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(0.4rem, 1.2vw, 0.9rem);
+  padding: clamp(0.45rem, 1.4vw, 0.9rem) clamp(0.6rem, 1.6vw, 1.1rem);
+  border-radius: clamp(10px, 2.4vw, 18px);
+  background: linear-gradient(135deg, #777ec0 0%, #4e256c 50%, #9383b2 100%);
+  border: clamp(2px, 0.45vw, 4px) solid var(--color-gold-main);
+  color: white;
+  box-shadow: 0 12px 34px rgba(8,6,20,0.55);
+  backdrop-filter: blur(6px);
+  max-width: min(420px, 40vw);
+  min-width: 120px;
 }
 
 .timerContainer {
@@ -34,14 +44,84 @@
   justify-content: center;
   align-items: center;
   height: auto;
-  width: 6rem;
-  background-color: var(--color-red-dark);
-  border-radius: 20px;
-  border: 3px solid var(--color-gold-main);
+  width: auto;
+  transform-origin: center;
+  animation: popIn 420ms cubic-bezier(.2,1.3,.2,1);
+  gap: 0.6rem;
+  padding: 0;
 }
 
 .clockIcon {
-  width: 1.5rem;
-  height: 1.5rem;
-  margin-right: 0.5rem;
+  /* MATCH .icon in ResetButton / highscoreButton */
+  width: clamp(1.5rem, 6.3vw, 2.3rem);
+  height: clamp(1.5rem, 6.3vw, 2.3rem);
+  flex: 0 0 auto;
 }
+
+.timerContainerCompact {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(0.3rem, 1.0vw, 0.7rem);
+
+  /* Padding scales with the font, so box grows with text */
+  padding: clamp(6px, 1.1vw, 12px) clamp(14px, 2vw, 20px);
+  border-radius: clamp(12px, 2.4vw, 20px);
+  min-width: 0;
+  margin: 0;
+
+  background: linear-gradient(180deg, #f78019 10%, #cb5c13 60%, #7a2e0a 90%);
+  color: white;
+  box-shadow:
+    inset 1px 0px rgba(207,101,8,0.9),
+    inset 0px -1px rgba(102,49,0,0.9),
+    0px 8px rgba(61,11,0,0.9),
+    0px -2px rgba(255,164,80,0.9),
+    0 12px 30px rgba(0,0,0,0.28);
+
+  transform-origin: center;
+  animation: popIn 420ms cubic-bezier(.2,1.3,.2,1);
+}
+
+.highscoreButton {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  text-transform: uppercase;
+  font-size: clamp(0.68rem, 1.4vw, 0.9rem);
+  cursor: pointer;
+  padding: clamp(6px, 1.1vw, 12px) clamp(10px, 1.6vw, 14px);
+  border-radius: clamp(12px, 2.4vw, 20px);
+  background: linear-gradient(180deg, #f78019 10%, #cb5c13 60%, #7a2e0a 90%);
+  color: white;
+  box-shadow:
+    inset 1px 0px rgba(207, 101, 8, 0.9),
+    inset 0px -1px rgba(102, 49, 0, 0.9),
+    0px 8px rgba(61, 11, 0, 0.9),
+    0px -2px rgba(255, 164, 80, 0.9),
+    0 12px 30px rgba(0, 0, 0, 0.28);
+  min-width: 96px;
+  margin: 0;
+  /* REMOVED: position, top, left, z-index, max-width */
+  animation: popIn 420ms cubic-bezier(.2, 1.3, .2, 1);
+  transform-origin: center;
+}
+
+.highscoreButton .icon {
+  width: clamp(1.5rem, 6.3vw, 2.3rem);
+  height: clamp(1.5rem, 6.3vw, 2.3rem);
+}
+
+@keyframes popIn {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.12); opacity: 1; }
+  85% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 420px) {
+  .badgeCommon { padding: clamp(0.3rem, 3.2vw, 0.6rem); border-radius: clamp(8px, 3.5vw, 12px); }
+  .timerContainerCompact { top: 12px; left: 12px; }
+}
+

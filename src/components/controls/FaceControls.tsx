@@ -7,19 +7,20 @@ import type { ControlZone, BlendshapeValues } from '../../types/blendshape'
 interface FaceControlsProps {
   onBlendshapesChange?: (blendshapes: BlendshapeValues) => void
   resetTrigger?: number
+  disabled?: boolean
 }
 
 const ZONE_POSITIONS = {
   r_ear:   { top: '45%', left: '80%' },
   l_ear:   { top: '45%', left: '20%' },
 
-  r_brow:  { top: '50%', left: '62%' },
-  l_brow:  { top: '50%', left: '38%' },
+  r_brow:  { top: '49%', left: '62%' },
+  l_brow:  { top: '49%', left: '38%' },
 
-  r_cheek: { top: '65%', left: '70%' },
-  l_cheek: { top: '65%', left: '30%' },
+  r_cheek: { top: '63%', left: '70%' },
+  l_cheek: { top: '63%', left: '30%' },
 
-  nose:    { top: '63%', left: '50%' },
+  nose:    { top: '60%', left: '50%' },
 
   mouth:   { top: '72%', left: '50%' },
 } as const
@@ -28,6 +29,7 @@ const OFFSET_FRACTION = 0.06
 export const FaceControls: React.FC<FaceControlsProps> = ({
   onBlendshapesChange,
   resetTrigger,
+  disabled = false,
 }) => {
   const [blendshapes, setBlendshapes] = useState<BlendshapeValues>({} as BlendshapeValues)
   const [wrapperSize, setWrapperSize] = useState({ width: 300, height: 500 })
@@ -63,7 +65,7 @@ export const FaceControls: React.FC<FaceControlsProps> = ({
       ZONE_POSITIONS[zone.id as keyof typeof ZONE_POSITIONS] || {}
     const { width: wrapperWidth, height: wrapperHeight } = wrapperSize
 
-    const zoneSize = wrapperWidth * 0.18
+    const zoneSize = wrapperWidth * 0.20
 
     let offsetX = 0
     let offsetY = 0
@@ -94,17 +96,17 @@ export const FaceControls: React.FC<FaceControlsProps> = ({
   }, [blendshapes, wrapperSize])
 
   return (
-    <div ref={wrapperRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+    <div ref={wrapperRef} style={{ position: 'absolute', inset: 0, pointerEvents: disabled ? 'none' : 'none' }}>
       {CONTROL_ZONES.map((zone: ControlZone) => (
         <DragZone
           key={zone.id}
           zone={zone}
-          onDragStart={startDrag}
-          onDrag={applyDrag}
-          onRelease={() => {}}
+          onDragStart={disabled ? undefined : startDrag}
+          onDrag={disabled ? undefined : applyDrag}
+          onRelease={disabled ? undefined : (() => {})}
           style={{
             ...getZoneStyle(zone),
-            pointerEvents: 'auto',
+            pointerEvents: disabled ? 'none' : 'auto',
           }}
         />
       ))}

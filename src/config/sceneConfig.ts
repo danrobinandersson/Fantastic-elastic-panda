@@ -10,37 +10,37 @@ camera: {
   },
 
   environment: {
-    preset: "dawn",
-    intensity: 0.2,
+    preset: "studio",
+    intensity: 0.1,
     blur: 0.7,
-    rotation: -0.65,
+    rotation: 3.14,
   },
 
   ambientLight: {
-    intensity: 0.0,
+    intensity: 0.6,
   },
 
   light1: {
-    color: "#d56103",
-    intensity: 225,
+    color: "#096afc",
+    intensity: 117,
     distance: 12.1,
-    decay: 1.0,
-    position: [-1.4, 6.7, -2.5],
+    decay: 0.9,
+    position: [0, 3.2, -1.2],
   },
 
   light2: {
     color: "#ba6040",
-    intensity: 161,
-    distance: 23.6,
-    decay: 0.9,
-    position: [0.0, -3.5, -3.4],
+    intensity: 209,
+    distance: 17.76,
+    decay: 0.8,
+    position: [0.3, -4.2, -3.1],
   },
 
   light3: {
     color: "#823f00",
-    intensity: 888,
-    distance: 26.5,
-    decay: 1.3,
-    position: [-2.3, 5.3, 20.2  ],
+    intensity: 607,
+    distance: 46.9,
+    decay: 1.2,
+    position: [-0.4, 8.3, 13.6  ],
   },
 }

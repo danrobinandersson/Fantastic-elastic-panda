@@ -9,7 +9,7 @@ import { useBlinkAnimation } from '../../hooks/useBlinkAnimation'
 import { MORPH_KEYS } from '../../config/morphKeys'
 
 type GLTFResult = GLTF & {
-  nodes: { Panda001: THREE.Mesh; EyeL: THREE.Mesh; EyeR: THREE.Mesh }
+  nodes: { Panda001: THREE.Mesh; EyeL: THREE.Mesh; EyeR: THREE.Mesh; Body: THREE.Mesh }
   materials: { Panda: THREE.MeshStandardMaterial; Eyes: THREE.MeshStandardMaterial }
   animations: any[]
 }
@@ -27,6 +27,7 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
   const meshRef = useRef<THREE.Mesh>(null)
   const springs = useSpringStates(MORPH_KEYS)
   const { updateBlink } = useBlinkAnimation()
+  materials.Panda.vertexColors = false
 
   useFrame((_, delta) => {
     const mesh = meshRef.current
@@ -62,7 +63,7 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
 
   return (
     <group ref={ref} {...groupProps} dispose={null}>
-      <group rotation={[Math.PI / 2, 0, 0]} scale={0.01} position={[0, -1.5, 0]}>
+      <group rotation={[Math.PI / 2.15, 0, 0]} scale={0.01} position={[0, -1.5, 0]}>
         <mesh
           ref={meshRef}
           name="Panda001"
@@ -73,9 +74,41 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
           receiveShadow={props.receiveShadow}
           castShadow={props.castShadow}
         >
-          <mesh geometry={nodes.EyeL.geometry} material={materials.Panda} position={[-32, 13.7448, -24.33]} rotation={[Math.PI / 2, 0, 0]} scale={[1, 1, 1]} />
-          <mesh geometry={nodes.EyeR.geometry} material={materials.Panda} position={[32, 13.7448, -24.33]} rotation={[Math.PI / 2, 0, 0]} scale={[1, 1, 1]} />
-        </mesh>
+
+
+<mesh
+  geometry={nodes.EyeR.geometry}
+  position={[31, 14, -24]}
+  material={materials.Panda}
+  scale={[1, 1, 1]}
+
+/>
+
+<mesh
+  geometry={nodes.EyeL.geometry}
+  position={[-31, 14, -24]}
+  material={materials.Panda}
+  scale={[1, 1, 1]}
+/>
+
+
+
+
+{/*
+<mesh
+  name="Body"
+  geometry={nodes.Body.geometry}
+  material={materials.Panda}
+  position={nodes.Body.position}
+  rotation={nodes.Body.rotation}
+  scale={nodes.Body.scale}
+  receiveShadow={props.receiveShadow}
+  castShadow={props.castShadow}
+/>         
+
+>*/}
+
+</mesh>
       </group>
     </group>
   );

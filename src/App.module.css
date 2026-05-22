@@ -1,21 +1,27 @@
 .targetWindow {
   position: absolute;
 
-  top: 4%;
-  right: 4%;
+  top: clamp(14px, 3%, 26px);
+  right: clamp(14px, 3%, 26px);
 
   /*
-    Responsive sizing
+    Better proportional sizing:
+    - larger on desktop
+    - slightly larger on old phones
+    - no giant scaling on narrow devices
   */
-  width: clamp(200px, 28vw, 250px);
+  width: clamp(138px, min(50vw, 32vh), 380px);
 
   aspect-ratio: 1 / 1;
 
   z-index: 30;
 
   border-radius: 30px;
-  padding: 1rem;
+
+  padding: clamp(8px, 1.2vw, 14px);
+
   box-sizing: border-box;
+
   background: linear-gradient(
     180deg,
     #f78019 10%,
@@ -23,14 +29,16 @@
     #7a2e0a 90%
   );
 
+  /*
+    Restored chunky border/shadow look
+  */
   box-shadow:
     inset 1px 0px rgb(207, 101, 8),
     inset 0px -1px rgb(102, 49, 0),
     0px 8px rgb(61, 11, 0),
-    0px -2px rgb(255, 164, 80);
-    
+    0px -2px rgb(255, 164, 80),
+    0 12px 30px rgba(0,0,0,0.28);
 }
-
 
 .targetCanvasWrapper {
   position: relative;
@@ -67,7 +75,7 @@
 
 
 /*
-  ensure canvas renders above gradient
+  Ensure canvas sits above gradient
 */
 .targetCanvasWrapper canvas {
   position: relative;
@@ -88,7 +96,7 @@
 .windowText {
   position: absolute;
 
-  top: 15px;
+  top: clamp(16px, 2.6vw, 16px);
   left: 0;
   right: 0;
 
@@ -100,35 +108,9 @@
 
   pointer-events: none;
 
-  color: #ffe57e;
 
-  font-size: clamp(18px, 2vw, 24px);
 
-  font-weight: bold;
+  font-size: clamp(16px, 3vw, 32px);
 
-  text-shadow:
-    0 1px 0 #000,
-    0 2px 0 #000,
-    0 3px 0 #000,
-    0 4px 6px rgba(0, 0, 0, 0.6);
-}
 
-/*
-  Smaller phones
-*/
-@media (max-width: 768px) {
-  .targetWindow {
-    width: clamp(180px, 30vw, 150px);
-
-    top: 3%;
-    right: 3%;
-
-    padding: 8px;
-  }
-
-  .windowText {
-    top: 12px;
-
-    font-size: 18px;
-  }
 }

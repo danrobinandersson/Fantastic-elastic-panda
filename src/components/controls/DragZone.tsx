@@ -45,24 +45,29 @@ export function DragZone({ zone, onDragStart, onDrag, onRelease, style }: DragZo
 
     originRef.current = { x: t.clientX, y: t.clientY }
     onDragStart?.(zone)
-  }
 
-  function onTouchMove(e: React.TouchEvent) {
-    e.preventDefault()
-    if (!originRef.current) return
+    // Attach passive: false listener for touch move to allow preventDefault
+    const touchMoveHandler = (event: TouchEvent) => {
+      event.preventDefault()
+      if (!originRef.current) return
 
-    const t = e.touches[0]
+      const touch = event.touches[0]
+      onDrag(
+        zone,
+        touch.clientX - originRef.current.x,
+        touch.clientY - originRef.current.y
+      )
+    }
 
-    onDrag(
-      zone,
-      t.clientX - originRef.current.x,
-      t.clientY - originRef.current.y
-    )
-  }
+    const touchEndHandler = () => {
+      originRef.current = null
+      onRelease?.(zone)
+      window.removeEventListener('touchmove', touchMoveHandler as EventListener)
+      window.removeEventListener('touchend', touchEndHandler as EventListener)
+    }
 
-  function onTouchEnd() {
-    originRef.current = null
-    onRelease?.(zone)
+    window.addEventListener('touchmove', touchMoveHandler as EventListener, { passive: false } as AddEventListenerOptions)
+    window.addEventListener('touchend', touchEndHandler as EventListener)
   }
 
   return (
@@ -71,8 +76,6 @@ export function DragZone({ zone, onDragStart, onDrag, onRelease, style }: DragZo
       onDragStart={(e) => e.preventDefault()}
       onMouseDown={onMouseDown}
       onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
       style={{
         position: 'absolute',
         width: '1%',

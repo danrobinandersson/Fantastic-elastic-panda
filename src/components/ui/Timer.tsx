@@ -5,6 +5,7 @@ type TimerProps = {
   duration: number;
   isRunning: boolean;
   onComplete: () => void;
+  compact?: boolean;
 };
 
 export default function Timer({ duration, isRunning, onComplete }: TimerProps) {
@@ -29,6 +30,26 @@ export default function Timer({ duration, isRunning, onComplete }: TimerProps) {
     return () => clearTimeout(timeoutId);
   }, [count, isRunning, onComplete]);
 
+  if (false) {
+    // keep typescript happy for potential future branches
+  }
+
+  if ((arguments[0] as any).compact) {
+    return (
+      <div className={styles.timerContainerCompact}>
+        <img
+          className={styles.clockIcon}
+          src="/src/assets/icons/clock-icon.svg"
+          alt="Timer"
+        />
+
+        <h2 className={`${styles.timer} ${count <= 5 ? styles.warning : ""}`}>
+          {count}
+        </h2>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.timerContainer}>
       <img
@@ -37,9 +58,9 @@ export default function Timer({ duration, isRunning, onComplete }: TimerProps) {
         alt="Timer"
       />
 
-      <h1 className={`${styles.timer} ${count <= 5 ? styles.warning : ""}`}>
-        0 : {count}
-      </h1>
+      <h2 className={`${styles.timer} ${count <= 5 ? styles.warning : ""}`}>
+        {count}
+      </h2>
     </div>
   );
 }

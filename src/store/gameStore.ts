@@ -34,10 +34,10 @@ export const useGameStore = create<GameStore>()((set) => ({
   playerBlendshapes: {} as BlendshapeValues,
 
   config: {
-    price: 5,
-    timerSeconds: 30,
-    doubleWinThreshold: 95,
-    moneyBackThreshold: 90,
+    price: 1, // €1 entry cost
+    timerSeconds: 15,
+    doubleWinThreshold: 93, // 93+ = 2x payout
+    moneyBackThreshold: 90, // 90-92 = 1x payout
   },
 
   setPlayerBlendshapes: (values) => set({ playerBlendshapes: values }),

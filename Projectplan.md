@@ -1,304 +1,708 @@
-#  Fantastic Elastic Panda — Project Plan
+# Fantastic Elastic Panda — Project Plan
 
 > Tivoli School Assignment · 2 people · 3 weeks
 
 ---
 
-## 1. Overview
+# 1. Overview
 
-Fantastic Elastic Panda is a Three.js blendshape-matching game. A red panda model is displayed with a randomly configured face. The player has a set time limit to reproduce the same facial configuration using intuitive drag controls. Score is calculated from blendshape value proximity and determines coin payouts.
+Fantastic Elastic Panda is a Three.js blendshape-matching game where players attempt to recreate a target panda facial expression before time runs out.
+
+The game uses:
+- React
+- TypeScript
+- Three.js via React Three Fiber
+- Supabase for backend validation and leaderboards
+
+The player manipulates a 3D panda face using drag gestures. Scores are calculated based on how closely the player's blendshape values match the target expression.
+
+The project includes:
+- Full game loop
+- Mobile-first interaction
+- Supabase leaderboard
+- Server-authoritative anti-cheat validation
+- Centralbank API integration
+- Admin configuration page
+
+---
+
+# 2. Project Scope
 
 | | |
 |---|---|
-| **Team** | 2 people |
-| **Duration** | 3 weeks |
-| **Stack** | React · TypeScript · Three.js (via react-three-fiber) |
-| **Model** | Provided — GLTF/GLB with blendshape morph targets |
-| **Deploy** | Early deploy recommended (CORS) |
+| Team | 2 people |
+| Duration | 3 weeks |
+| Frontend | React + TypeScript |
+| 3D Engine | Three.js via @react-three/fiber |
+| Backend | Supabase |
+| Model Format | GLTF / GLB |
+| Deployment | Early deployment recommended |
 
 ---
 
-## 2. MVP Scope
+# 3. Core Features
 
-### 2.1 Must — Core Game
+## 3.1 Must — Core Gameplay
 
-- GLTF model loads with morph targets (blendshapes) functional
-- Two model instances: locked target + player-controlled copy
-- 8 drag-control regions (invisible, touch/mouse activated):
-  - Left Ear, Right Ear
-  - Left Eyebrow, Right Eyebrow
-  - Left Cheek, Right Cheek
-  - Nose, Mouth
-- Each control maps X/Y drag delta → two blendshape axes (e.g. Up/Down, Left/Right)
-- Opposing shape keys mutually exclusive (R_Ear_Up blocks R_Ear_Down)
-- Symmetrical L/R controls share logic, mirrored on X axis
-- 30-second countdown timer
-- Score calculated from average blendshape delta (0–100%)
-- Win condition: 95%+ → double coins, 90–95% → money back, <90% → no win
-- Centralbank API integration: deduct stake on entry, pay out winnings, award stamp
-- Check user balance before allowing entry
-
-### 2.2 Must — UI / A11y
-
-- Mobile-first, no scroll required — full viewport layout
-- Works on both mobile (touch) and desktop (mouse)
-- Fullscreen API on Android/desktop; `100dvh` fallback for iOS Safari
-- Keyboard accessible controls (WCAG 2.1.1)
-- Sufficient tap target sizes min 44×44px (WCAG 2.5.5)
-- Contextual help visible (WCAG 3.3.5)
-- Consistent styling throughout
-
-### 2.3 Must — Admin Page
-
-- Minimal, functional — no design requirement
-- Adjust entry price
-- Adjust win payout multipliers
-
-### 2.4 Should (if time allows)
-
-- Score animation: percentage ticks up on result screen
-- Player scoreboard (top scores)
-- Tutorial / rules overlay
-- Anti-cheat / script detection
-- Admin: adjust timer length
-- Admin: adjust win threshold percentages
-
-### 2.5 Could (stretch)
-
-- Forehead control (9th control point)
-- Drum roll sound on score reveal
-- Two-player mode
-
-
-### 2.6 Won't 
-
-- More than 2 player types
-- Additional animals
+- Load GLTF panda model with working morph targets
+- Two panda instances:
+  - Target Panda
+  - Player Panda
+- Blendshape-based facial manipulation
+- Touch + mouse drag controls
+- Timer-based gameplay
+- Blendshape score calculation
+- Centralbank API integration
+- Dynamic reward system
+- Tutorial flow
+- Leaderboard system
+- Supabase-backed anti-cheat validation
 
 ---
 
-## 3. Blendshape Control System
+## 3.2 Must — UI / UX
 
-Each control is an invisible draggable zone overlaid on the face region. Dragging maps the pointer offset from the zone's center to shape key values:
+- Mobile-first layout
+- Full viewport gameplay
+- No page scroll
+- Touch + mouse support
+- Fullscreen support where available
+- Animated transitions
+- WCAG-compliant touch targets
+- Accessible controls
+- Contextual help overlays
+- Responsive layout
 
-| Gesture | Blendshape Effect |
+---
+
+## 3.3 Must — Backend & Security
+
+Supabase is the authoritative backend.
+
+Features:
+- Authentication
+- Session ownership
+- Leaderboards
+- Event storage
+- Server-side score validation
+- Anti-cheat validation
+- Secure RPC / Edge Functions
+
+---
+
+## 3.4 Must — Highscore System
+
+- Persistent leaderboard
+- Top 10 scores
+- Stored in Supabase
+- Server-validated scores only
+- Displayed inside modal component
+- Highlight player when entering leaderboard
+
+---
+
+## 3.5 Should (If Time Allows)
+
+- Drum roll audio
+- Advanced animations
+- Adjustable timer settings
+- Additional reward tiers
+- Enhanced leaderboard transitions
+
+---
+
+## 3.6 Could (Stretch Goals)
+
+- Additional face regions
+- Alternate panda skins
+
+---
+
+# 4. User Flow & UI Specification
+
+# 4.1 First Visit Experience
+
+When a player visits for the first time:
+
+- Show tutorial modal
+- 4-page slideshow
+- Navigation:
+  - Previous
+  - Next
+  - Skip
+- Progress dots at bottom
+
+---
+
+## Tutorial Slides
+
+### Slide 1
+> Match the target panda’s expression before time runs out.
+
+### Slide 2
+> Drag the panda’s face using your finger or mouse to match the target expression.
+
+### Slide 3
+> The closer your match, the higher your score.
+
+> Reach `{config.moneyBackThreshold}%` to win your money back.  
+> Reach `{config.doubleWinThreshold}%` to double your reward.
+
+### Slide 4
+> Press “Play” when you’re ready.
+
+---
+
+# 4.2 Returning Users
+
+Returning users skip the tutorial and go directly to the main screen.
+
+---
+
+# 4.3 Main Screen
+
+## Visible Elements
+
+### A. Player Panda
+Interactive panda controlled by the player.
+
+---
+
+### B. Target Panda
+- Neutral by default
+- Idle blinking animation
+- Expression changes during gameplay
+
+---
+
+### C. Controls Hint
+
+Displays:
+- Finger icon on mobile
+- Mouse icon on desktop
+
+Text:
+> Drag to match
+
+Includes:
+- Question mark button
+- Opens tutorial modal
+
+---
+
+### D. Play Button
+
+```html
+<h2>Play!</h2>
+<p>Cost: €[actualCost]</p>
+<img>[Coin]</img>
+```
+
+Cost value is dynamic.
+
+---
+
+### E. Reset Button
+
+Resets:
+- Player blendshapes to neutral
+
+---
+
+### F. Highscore Button
+
+- Trophy icon
+- Positioned top-left
+- Opens leaderboard modal
+
+Displays:
+- Top 10 players
+- Scores
+
+---
+
+# 4.4 Pre-Game Rules
+
+Before gameplay:
+- Player can freely manipulate PlayerPanda
+- TargetPanda remains neutral
+
+---
+
+# 4.5 Game Start Flow
+
+When Play is clicked:
+
+## Immediate Actions
+
+### Target Panda
+- Random expression generated
+- Animation system activated
+
+### Player Panda
+- Blendshapes reset to neutral
+
+### Timer
+- Appears top-left
+- Animated entrance
+
+### Play Button
+- Shrink/fade animation
+- Hidden afterward
+
+### Controls Hint
+- Shrink/fade animation
+- Hidden afterward
+
+---
+
+# 4.6 Game End Flow
+
+When timer expires:
+
+## Immediate Actions
+
+### Player Panda
+- Expression freezes
+- Still allowed to blink
+
+### Delay
+- Small suspense delay before results
+
+---
+
+## Results Modal
+
+### Title
+
+```html
+<h2>Time’s up!</h2>
+```
+
+---
+
+### Score Display
+
+```text
+Your score: [Score]
+```
+
+Animation:
+- Count up from 0
+- Ease-in animation
+- Approx. 5 seconds
+
+---
+
+### Highscore Notification
+
+If player enters leaderboard:
+- Display special notification
+
+---
+
+### Result Messages
+
+Examples:
+- Amazing match!
+- So close!
+- Better luck next time!
+
+---
+
+### Reward Stamp
+
+```text
+You received...
+[Reward from API]
+```
+
+---
+
+## Modal Buttons
+
+### Highscore
+Displays leaderboard modal.
+
+### Return to Tivoli
+Returns player to Tivoli website.
+
+---
+
+# 5. Blendshape Control System
+
+## Drag Zones
+
+Invisible drag regions:
+- Left Ear
+- Right Ear
+- Left Eyebrow
+- Right Eyebrow
+- Left Cheek
+- Right Cheek
+- Nose
+- Mouth
+
+---
+
+## Gesture Mapping
+
+| Gesture | Result |
 |---|---|
-| Drag up | Activates `_Up` shape key (0→1 over drag range), zeroes `_Down` |
-| Drag down | Activates `_Down` shape key, zeroes `_Up` |
-| Drag right | Activates `_Right` shape key, zeroes `_Left` |
-| Drag left | Activates `_Left` shape key, zeroes `_Right` |
-| Diagonal | Both axes active simultaneously, values split proportionally |
-
-The naming convention is parsed programmatically:
-
-- Split on underscore: `[Side?, BodyPart, Direction]`
-- Side (`R`/`L`) determines which control zone owns the key
-- Direction (`Up`/`Down`/`Left`/`Right`) determines axis and sign
-- L/R controls share a single React component with an `isRight` prop; X axis is mirrored
-
-Control zones are invisible by default. On first touch/click a brief highlight ring appears to teach the player where the zones are, then fades. The face works as a pure gesture surface after that.
+| Drag up | Activates `_Up` |
+| Drag down | Activates `_Down` |
+| Drag left | Activates `_Left` |
+| Drag right | Activates `_Right` |
+| Diagonal | Blends both axes |
 
 ---
 
-## 4. Game Loop
+## Blendshape Rules
+
+- Opposing shapes are mutually exclusive
+- Symmetrical controls share logic
+- Mirror support via `isRight`
+
+---
+
+# 6. Game Loop
 
 | Step | Description |
 |---|---|
-| 1. Entry | User pays stake via API. Balance checked first. |
-| 2. Target reveal | Random blendshape values set. Spinning animation plays, stops, face visible ~2s. |
-| 3. Transition | Target model floats up and shrinks. Player model appears. |
-| 4. Match phase | Timer starts (30s). "Match!" text shown. Controls active. |
-| 5. Time up | "Finish!" shown. Controls locked. Blendshapes frozen. |
-| 6. Score calc | Per-key delta averaged. Score = 100% − avg error. |
-| 7. Payout | API called based on win tier. Stamp awarded. |
-| 8. Result | Score animates up. Win/lose message shown. Play again option. |
+| 1 | Supabase session created |
+| 2 | Entry cost deducted |
+| 3 | Target expression generated |
+| 4 | Reveal animation plays |
+| 5 | Match phase begins |
+| 6 | Client records snapshots (~10Hz) |
+| 7 | Timer expires |
+| 8 | Samples submitted to Edge Function |
+| 9 | Server validates gameplay |
+| 10 | Score recomputed server-side |
+| 11 | Reward payout triggered |
+| 12 | Results displayed |
 
 ---
 
-## 5. Project Structure
+# 7. Supabase Architecture
 
-```
-fantastic-elastic-panda/
-├── public/
-│   └── panda.glb                   # 3D model (GLTF binary)
-├── src/
-│   ├── api/
-│   │   ├── centralbank.ts           # All API calls (typed)
-│   │   └── types.ts                 # API request/response types
-│   ├── components/
-│   │   ├── scene/
-│   │   │   ├── PandaModel.tsx        # R3F mesh + morph target control
-│   │   │   ├── TargetPanda.tsx       # Locked random target
-│   │   │   ├── PlayerPanda.tsx       # Player-controlled copy
-│   │   │   └── SceneLayout.tsx       # Camera, lighting, canvas
-│   │   ├── controls/
-│   │   │   ├── DragZone.tsx          # Single invisible drag control
-│   │   │   ├── FaceControls.tsx      # Renders all 8 DragZones
-│   │   │   └── useBlendshapeControl  # Hook: drag → shape key values
-│   │   ├── ui/
-│   │   │   ├── Timer.tsx
-│   │   │   ├── ScoreReveal.tsx
-│   │   │   ├── ResultScreen.tsx
-│   │   │   └── HelpOverlay.tsx
-│   │   └── admin/
-│   │       ├── AdminPage.tsx
-│   │       └── AdminForm.tsx
-│   ├── hooks/
-│   │   ├── useGameState.ts           # Game loop state machine
-│   │   ├── useTimer.ts
-│   │   └── useApi.ts                 # Typed fetch wrapper
-│   ├── types/
-│   │   ├── blendshape.ts             # BlendshapeKey, ControlZone, etc.
-│   │   ├── game.ts                   # GameState, WinTier, Score
-│   │   └── api.ts                    # ApiError, UserBalance, Stamp
-│   ├── utils/
-│   │   ├── blendshapeParser.ts       # Name → side/part/direction
-│   │   ├── scoreCalculator.ts        # Blendshape delta → score %
-│   │   └── randomFace.ts             # Generate valid random values
-│   ├── config/
-│   │   └── gameConfig.ts             # Price, timer, thresholds (admin editable)
-│   ├── App.tsx
-│   └── main.tsx
-├── tsconfig.json                     # strict, noImplicitAny, strictNullChecks
-├── vite.config.ts
-└── package.json
-```
+Supabase is the authoritative backend.
 
 ---
 
-## 6. Packages
+## Responsibilities
 
-### Core
+### Client
+- Rendering
+- Input handling
+- Snapshot collection
 
-| Package | Version | Purpose |
-|---|---|---|
-| `react` | ^18 | UI framework — required by assignment |
-| `typescript` | ^5 | Required by assignment |
-| `vite` | ^5 | Fast dev server and bundler |
-| `@react-three/fiber` | ^8 | React renderer for Three.js |
-| `@react-three/drei` | ^9 | Helpers: useGLTF, OrbitControls, Html |
-| `three` | ^0.165 | Underlying 3D engine (peer dep of r3f) |
-
-### TypeScript Types
-
-| Package | Version | Purpose |
-|---|---|---|
-| `@types/three` | ^0.165 | Three.js TypeScript definitions |
-| `@types/react` | ^18 | React TypeScript definitions |
-
-### UI & Utility
-
-| Package | Version | Purpose |
-|---|---|---|
-| `zustand` | ^4 | Lightweight game state management |
-| `clsx` | ^2 | Conditional className utility |
-| `framer-motion` | ^11 | Score reveal animation, screen transitions |
-
-### Optional / Nice-to-have
-
-| Package | Version | Purpose |
-|---|---|---|
-| `howler` | ^2.2 | Audio — drum roll on score reveal |
-| `react-router-dom` | ^6 | Routing to /admin page |
-
-> **Note:** `@react-three/fiber` wraps Three.js so you write React components instead of imperative Three.js code. `useGLTF` from drei handles GLTF loading including morph targets automatically. Strongly recommended over raw Three.js inside React to avoid lifecycle conflicts.
+### Server
+- Session validation
+- Score recomputation
+- Anti-cheat detection
+- Leaderboards
+- Secure payouts
 
 ---
 
-## 7. TypeScript Design Notes
+# 7.1 Session Flow
 
-| Type | Description |
-|---|---|
-| `BlendshapeKey` | Union type of all valid morph target names from the GLTF |
-| `ControlZone` | Interface: id, label, position, affectedKeys, isRight |
-| `BlendshapeValues` | `Record<BlendshapeKey, number>` — the main state shape |
-| `GamePhase` | Enum: `IDLE \| REVEALING \| PLAYER_TURN \| FINISHED \| RESULT` |
-| `WinTier` | Enum: `DOUBLE \| MONEY_BACK \| NO_WIN` |
-| `ApiError` | Interface: message, status? — for typed catch blocks |
-| `Stamp` | Interface: animal, metal? — per centralbank spec |
+## Start Game
 
-The `blendshapeParser` utility takes a raw morph target name string and returns a typed object — good candidate for a type guard and union narrowing (bonus TypeScript requirement).
+Server creates:
+- session_id
+- started_at
+- config snapshot
 
 ---
 
-## 8. 3-Week Plan
+## During Gameplay
 
-### Week 1 · Days 1–5 — 3D integration working end-to-end
-
-| Day | Tasks |
-|---|---|
-| Day 1–2 | Vite project setup, tsconfig, folder structure. Load GLTF in r3f. Confirm morph targets accessible. Basic scene with camera and lighting. |
-| Day 3 | Build `DragZone` with mouse + touch drag events. Map drag delta → two blendshape axes. One control working fully. |
-| Day 4 | Wire all 8 control zones. Symmetry logic (`isRight` mirror). All shape keys responding correctly. |
-| Day 5 | Random face generator. Two model instances in scene. Target model shows random face. |
-
-### Week 2 · Days 6–10 — Full game loop playable
-
-| Day | Tasks |
-|---|---|
-| Day 6 | Game state machine (`GamePhase` enum). Spinning reveal animation. |
-| Day 7 | Transition animation: target floats up/shrinks, player model appears. Timer component. |
-| Day 8 | Score calculation (blendshape delta average). Result screen. Win tier logic. |
-| Day 9 | Centralbank API integration: balance check, stake deduction, payout, stamp. Typed API layer. |
-| Day 10 | Mobile layout pass. Full viewport, no scroll. Touch event polish. Fullscreen API implementation. |
-
-### Week 3 · Days 11–15 — Polish, A11y, admin, deploy
-
-| Day | Tasks |
-|---|---|
-| Day 11 | A11y pass: keyboard controls for drag zones, target sizes, help overlay. |
-| Day 12 | Admin page: entry price, payout multipliers. Minimal but functional. |
-| Day 13 | Score reveal animation (framer-motion). Should-tier items if time allows. |
-| Day 14 | Cross-device QA: iOS Safari, Android Chrome, desktop browsers. CORS check. |
-| Day 15 | Buffer / documentation / final deploy. Project plan and evaluation docs. |
-
----
-
-## 9. Risks & Mitigations
-
-| Risk | Mitigation |
-|---|---|
-| GLTF morph targets not loading correctly | Test on Day 1. `useGLTF` + drei exposes `morphTargetDictionary`. Fallback: inspect with Three.js editor online. |
-| Touch drag conflicts with page scroll | No-scroll layout + `touch-action: none` on drag zones eliminates this. Fullscreen API removes browser chrome on Android. |
-| Centralbank API not ready | Swagger YAML available. Mock API locally with typed stubs from Day 1. |
-| 3D transition animations complex | If difficult, static swap between phases still ships a working game. |
-| iOS Safari fullscreen not supported | Use `100dvh` + `touch-action: none` fallback. Optionally show "Add to Home Screen" tip. |
-
----
-
-## 10. Mobile Layout Strategy
-
-Since no scroll is the goal, the full viewport is divided into fixed regions:
-
-| Region | Content |
-|---|---|
-| Top bar (~10vh) | Game title, timer, balance display |
-| 3D canvas (~70vh) | Both panda models. Target small top-left, player center. |
-| Bottom bar (~20vh) | Status text ("Match!", "Finish!"), action button |
-
-Control zones are absolutely positioned overlays on the canvas, sized at minimum 44×44px for WCAG tap target compliance. On mobile, tapping a zone activates it and further drag moves the shape — the face works as a pure gesture surface. A brief highlight ring appears on first touch to teach zone locations, then fades.
-
-### Fullscreen
+Client records:
 
 ```ts
-const canFullscreen = !!document.documentElement.requestFullscreen;
-
-// Trigger on user gesture (tap)
-if (canFullscreen) {
-  document.documentElement.requestFullscreen();
+{
+  ts: Date.now(),
+  sample: {
+    Mouth_Left: 0.4,
+    Eye_Right_Up: 0.7
+  }
 }
 ```
 
-- **Android / desktop:** Full Fullscreen API support — browser chrome hides completely
-- **iOS Safari:** No Fullscreen API — fall back to `height: 100dvh` layout gracefully
+Recommended rate:
+- ~10Hz
 
+---
 
+## End Game
 
+Client submits:
+- sessionId
+- sample array
 
+to:
+- Supabase Edge Function
 
-Documentation:
+---
 
-r3f: https://r3f.docs.pmnd.rs/getting-started/introduction
-drei: https://drei.docs.pmnd.rs (useGLTF, Environment, OrbitControls, etc.)
-gltfjsx (CLI to auto-generate your model component): https://github.com/pmndrs/gltfjsx
-Three.js (underlying reference for morphTargetInfluences etc.): https://threejs.org/docs
+## Validation
+
+Server validates:
+- Session ownership
+- Timestamp order
+- Sample rate
+- Impossible movement
+- Duration limits
+- Blendshape sanity
+- Recomputed score
+
+Only server-computed scores are valid.
+
+---
+
+# 7.2 Anti-Cheat Strategy
+
+## Never Trust the Client
+
+The client:
+- Can be modified
+- Can fake scores
+
+The server:
+- Recomputes score
+- Validates all gameplay
+
+---
+
+## Validation Rules
+
+- Monotonic timestamps
+- Max sample rate
+- No future timestamps
+- Reasonable movement deltas
+- Session duration validation
+- Payload sanity checks
+
+---
+
+# 7.3 Database Tables
+
+## sessions
+
+Stores:
+- User ID
+- Start time
+- Config snapshot
+- Session status
+
+---
+
+## events
+
+Stores:
+- Timestamped blendshape samples
+
+---
+
+## results
+
+Stores:
+- Validated score
+- Leaderboard data
+- Reward metadata
+
+---
+
+# 7.4 Security
+
+Required:
+- Row Level Security (RLS)
+- Authenticated writes
+- Server-side validation
+- Hidden service_role keys
+
+Never:
+- Trust client score
+- Expose admin credentials
+- Accept direct leaderboard writes
+
+---
+
+# 8. Project Structure
+
+```txt
+fantastic-elastic-panda/
+├── public/
+│   └── panda.glb
+│
+├── src/
+│   ├── api/
+│   │   ├── centralbank.ts
+│   │   ├── antiCheat.ts
+│   │   ├── leaderboard.ts
+│   │   └── session.ts
+│   │
+│   ├── supabase/
+│   │   ├── client.ts
+│   │   ├── queries.ts
+│   │   └── types.ts
+│   │
+│   ├── components/
+│   │   ├── scene/
+│   │   ├── controls/
+│   │   ├── ui/
+│   │   └── admin/
+│   │
+│   ├── hooks/
+│   ├── utils/
+│   ├── config/
+│   ├── types/
+│   ├── App.tsx
+│   └── main.tsx
+│
+├── package.json
+├── tsconfig.json
+└── vite.config.ts
+```
+
+---
+
+# 9. Packages
+
+| Package | Purpose |
+|---|---|
+| react | UI |
+| typescript | Type safety |
+| vite | Bundler |
+| three | 3D engine |
+| @react-three/fiber | React renderer |
+| @react-three/drei | Helpers |
+| zustand | State management |
+| framer-motion | Animations |
+| @supabase/supabase-js | Backend |
+| zod | Runtime validation |
+| nanoid | IDs |
+
+---
+
+# 10. Accessibility
+
+Requirements:
+- Keyboard support
+- Touch targets ≥ 44x44px
+- Clear feedback
+- Mobile usability
+- Visible instructions
+- Consistent interactions
+
+---
+
+# 11. Mobile Layout Strategy
+
+| Region | Content |
+|---|---|
+| Top Bar | Timer + balance |
+| Main Area | Panda canvas |
+| Bottom Bar | Buttons + status |
+
+---
+
+## Fullscreen
+
+### Android/Desktop
+Use Fullscreen API.
+
+### iOS Safari
+Fallback:
+- 100dvh
+- touch-action: none
+
+---
+
+# 12. 3-Week Timeline
+
+# Week 1 — Core 3D Systems
+
+| Day | Tasks |
+|---|---|
+| 1 | Setup project + load GLTF |
+| 2 | Morph target testing |
+| 3 | Build drag controls |
+| 4 | Implement all control zones |
+| 5 | Random face generator |
+
+---
+
+# Week 2 — Gameplay + Backend
+
+| Day | Tasks |
+|---|---|
+| 6 | Game state machine |
+| 7 | Timer + transitions |
+| 8 | Score calculation |
+| 9 | Supabase setup |
+| 10 | Edge Functions + leaderboard |
+
+---
+
+# Week 3 — Polish + Validation
+
+| Day | Tasks |
+|---|---|
+| 11 | Anti-cheat validation |
+| 12 | Admin page |
+| 13 | Score animations |
+| 14 | Cross-device QA |
+| 15 | Final deploy + docs |
+
+---
+
+# 13. Risks & Mitigations
+
+| Risk | Mitigation |
+|---|---|
+| GLTF issues | Test early |
+| Touch conflicts | Disable scroll |
+| Fake scores | Server validation |
+| Large payloads | Sample throttling |
+| Edge Function cold starts | Lightweight validation |
+
+---
+
+# 14. Recommended Architecture
+
+Recommended stack:
+- React
+- TypeScript
+- React Three Fiber
+- Supabase
+- Edge Functions
+- Server-authoritative validation
+
+This architecture is:
+- Secure
+- Scalable
+- Mobile-friendly
+- Production-oriented
+- Realistic within 3 weeks
+
+---
+
+# 15. Documentation Links
+
+## React Three Fiber
+https://r3f.docs.pmnd.rs/getting-started/introduction
+
+## Drei
+https://drei.docs.pmnd.rs
+
+## GLTFJSX
+https://github.com/pmndrs/gltfjsx
+
+## Three.js
+https://threejs.org/docs
+
+## Supabase
+https://supabase.com/docs

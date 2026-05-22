@@ -60,16 +60,58 @@ export function randomFace(): BlendshapeValues {
  * Calculate match score between target and player blendshapes.
  * Only scores controllable blendshapes and normalizes by their max values.
  */
-export function scoreMatch(target: BlendshapeValues, player: BlendshapeValues): number {
+function remapScore(raw: number): number {
+  const points: [number, number][] = [
+    [0, 0],
+    [90, 85],
+    [93, 90],
+    [98, 95],
+    [100, 100],
+  ]
+
+  for (let i = 1; i < points.length; i++) {
+    const [x1, y1] = points[i - 1]
+    const [x2, y2] = points[i]
+
+    if (raw <= x2) {
+      const t = (raw - x1) / (x2 - x1)
+      return Math.round(y1 + t * (y2 - y1))
+    }
+  }
+
+  return raw
+}
+
+/**
+ * Calculate match score between target and player blendshapes.
+ * Only scores controllable blendshapes and normalizes by their max values.
+ */
+export function scoreMatch(
+  target: BlendshapeValues,
+  player: BlendshapeValues
+): number {
   let sumError = 0
 
   for (const key of CONTROLLABLE_MORPH_KEYS) {
     const max = getBlendshapeMaxValue(key as keyof BlendshapeValues)
-    const targetVal = (target[key as keyof BlendshapeValues] ?? 0) / max
-    const playerVal = (player[key as keyof BlendshapeValues] ?? 0) / max
+
+    const targetVal =
+      (target[key as keyof BlendshapeValues] ?? 0) / max
+
+    const playerVal =
+      (player[key as keyof BlendshapeValues] ?? 0) / max
+
     sumError += Math.abs(targetVal - playerVal)
   }
 
   const avgError = sumError / CONTROLLABLE_MORPH_KEYS.length
-  return Math.max(0, Math.round((1 - avgError) * 100))
+
+  // ORIGINAL SCORE (unchanged gameplay difficulty)
+  const rawScore = Math.max(
+    0,
+    Math.round((1 - avgError) * 100)
+  )
+
+  // REMAPPED DISPLAY SCORE
+  return remapScore(rawScore)
 }

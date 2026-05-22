@@ -1,55 +1,85 @@
-import { useEffect } from "react";
+import Modal from "./Modal";
 import Button from "./Button";
-import styles from "./GameResultModal.module.css";
+import { useEffect, useState } from "react";
 
 type GameResultModalProps = {
   score: number | null;
   token: string | null;
-  onExit: () => void;
+  config: {
+    doubleWinThreshold: number;
+    moneyBackThreshold: number;
+  };
+  onPlayAgain: () => void;
+  onReturnToTivoli: () => void;
+  onShowHighScores: () => void;
 };
 
 export default function GameResultModal({
   score,
   token,
-  onExit,
+  config,
+  onPlayAgain,
+  onReturnToTivoli,
+  onShowHighScores,
 }: GameResultModalProps) {
+  const [displayed, setDisplayed] = useState<number | null>(null);
+
   useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        onExit();
-      }
+    if (score === null) {
+      setDisplayed(null);
+      return;
     }
 
-    document.addEventListener("keydown", handleKeyDown);
+    const duration = 800;
+    const start = performance.now();
+    const from = 0;
+    const to = score;
 
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onExit]);
+    let raf = 0;
+
+    function step(t: number) {
+      const p = Math.min(1, (t - start) / duration);
+      const v = Math.round(from + (to - from) * p);
+      setDisplayed(v);
+      if (p < 1) raf = requestAnimationFrame(step);
+    }
+
+    raf = requestAnimationFrame(step);
+
+    return () => cancelAnimationFrame(raf);
+  }, [score]);
+
+function getFeedbackMessage() {
+  if (score === null) return "";
+
+  if (score >= 95) {
+    return "LEGENDARY! 5x payout!";
+  }
+
+  if (score >= 90) {
+    return "Amazing! Double win!";
+  }
+
+  if (score >= 85) {
+    return "Nice! You got your money back!";
+  }
+
+  return "Better luck next time!";
+}
 
   return (
-    <div className={styles.backdrop}>
-      <div
-        className={styles.modal}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="game-result-title"
-      >
-        <h2 id="game-result-title">Time’s up!</h2>
-
-        <p>Your score: {score ?? "-"}</p>
-
-        {/* Show token if it exists */}
-        {token ? (
-          <p>
-            You received: <strong>{token}</strong>
-          </p>
-        ) : (
-          <p>Generating reward...</p>
-        )}
-
-        <Button onClick={onExit}>Exit</Button>
-      </div>
-    </div>
+    <Modal onExit={onReturnToTivoli} labelId="game-result-title">
+      <h2 id="game-result-title">Time's up!</h2>
+      <p>Your score: {displayed ?? "–"}</p>
+      <p>{getFeedbackMessage()}</p>
+      {token ? (
+        <p>You received: <strong>{token}</strong></p>
+      ) : (
+        <p>Generating reward...</p>
+      )}
+      <Button onClick={onShowHighScores} variant="secondary">High Scores</Button>
+      <Button onClick={onPlayAgain}>Play Again</Button>
+      <Button onClick={onReturnToTivoli} variant="secondary">Return to Tivoli</Button>
+    </Modal>
   );
 }

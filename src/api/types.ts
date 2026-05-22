@@ -1,11 +1,16 @@
 export type UUID = string;
 
-export type Animal = "lion" | "dolphin" | "tucan" | "beetlebug" | "snake";
+export type Animal = "lion" | "dolphin" | "toucan" | "beetlebug" | "snake";
 export type Metal = "silver" | "gold" | "platinum";
-export type Stamp = Animal | `${Metal} ${Animal}`;
+
+export interface Stamp {
+  animal: Animal;
+  metal: Metal | null;
+  image_url: string | null;
+}
 
 export interface IdentityUser {
-  id: UUID;
+  id: number;
   name: string;
 }
 
@@ -17,15 +22,20 @@ export interface IdentityTokenResponse {
 export interface CreateTransactionRequest {
   identity_token: string;
   amount: number;
-  amusement_uuid: UUID;
 }
 
 export interface TransactionReceipt {
-  id: UUID;
-  stamp: Stamp;
+  transaction_id: number;
+  amount: number;
+  stamp: Stamp | null;
 }
 
 export interface PayoutRequest {
+  amount: number;
+}
+
+export interface PayoutResponse {
+  transaction_id: number;
   amount: number;
 }
 
@@ -36,5 +46,8 @@ export interface TivoliApi {
     request: CreateTransactionRequest,
   ): Promise<TransactionReceipt>;
 
-  payOut(transactionId: UUID, request: PayoutRequest): Promise<void>;
+  payOut(
+    transactionId: number,
+    request: PayoutRequest,
+  ): Promise<PayoutResponse>;
 }

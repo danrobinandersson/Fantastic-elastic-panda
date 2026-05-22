@@ -195,7 +195,7 @@ export const TargetPanda = React.forwardRef<THREE.Group, TargetPandaProps>(
     return (
       <group ref={groupRef} {...groupProps} dispose={null}>
         <group
-          rotation={[Math.PI / 2, 0, 0]}
+          rotation={[Math.PI / 2.1, 0, 0]}
           scale={0.01}
           position={[0, -1.5, 0]}
         >
@@ -210,21 +210,23 @@ export const TargetPanda = React.forwardRef<THREE.Group, TargetPandaProps>(
             receiveShadow={props.receiveShadow}
             castShadow={props.castShadow}
           >
-            <mesh
-              geometry={nodes.EyeL.geometry}
-              material={materials.Panda}
-              position={[-32, 13.7448, -24.33]}
-              rotation={[Math.PI / 2, 0, 0]}
-              scale={[1, 1, 1]}
-            />
+  <mesh
+  geometry={nodes.EyeR.geometry}
+  position={[31, 14, -24]}
+  material={materials.Panda}
+  scale={[1, 1, 1]}
 
-            <mesh
-              geometry={nodes.EyeR.geometry}
-              material={materials.Panda}
-              position={[32, 13.7448, -24.33]}
-              rotation={[Math.PI / 2, 0, 0]}
-              scale={[1, 1, 1]}
-            />
+/>
+
+<mesh
+  geometry={nodes.EyeL.geometry}
+  position={[-31, 14, -24]}
+  material={materials.Panda}
+  scale={[1, 1, 1]}
+/>
+
+
+
           </mesh>
         </group>
       </group>
