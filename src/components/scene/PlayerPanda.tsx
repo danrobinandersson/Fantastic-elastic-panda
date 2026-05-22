@@ -63,7 +63,7 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
 
   return (
     <group ref={ref} {...groupProps} dispose={null}>
-      <group rotation={[Math.PI / 2, 0, 0]} scale={0.01} position={[0, -1.5, 0]}>
+      <group rotation={[Math.PI / 2.15, 0, 0]} scale={0.01} position={[0, -1.5, 0]}>
         <mesh
           ref={meshRef}
           name="Panda001"
