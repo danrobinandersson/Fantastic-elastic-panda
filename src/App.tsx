@@ -484,7 +484,6 @@ export default function App() {
               )}
               <ResetButton onClick={handleReset} />
             </div>
-            //////
             {/* TARGET WINDOW */}
             <div className={styles.targetWindow}>
               <h2 className={styles.windowText}>TARGET</h2>
