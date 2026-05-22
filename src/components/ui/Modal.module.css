@@ -102,7 +102,7 @@
   .modal {
     width: min(92vw, 620px);
     height: min(90svh, 720px);
-    width: max(500px);
+    width: max(200px);
     aspect-ratio: 9 / 16;
 
     padding: 4rem 2rem 2rem;
