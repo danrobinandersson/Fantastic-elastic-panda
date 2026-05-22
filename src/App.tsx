@@ -307,22 +307,32 @@ export default function App() {
     RETURN TO TIVOLI
   */
   const handleReturnToTivoli = useCallback(() => {
-    // Reset all game state
-    setScore(null);
-    setRewardToken(null);
-    setTransactionId(0);
-    setSessionId(null);
-    setTarget({} as BlendshapeValues);
-    setIdentityToken(null);
-    setPlayer(null);
+  // Reset game state
+  setScore(null);
+  setRewardToken(null);
+  setTransactionId(0);
+  setSessionId(null);
+  setTarget({} as BlendshapeValues);
+  setIdentityToken(null);
+  setPlayer(null);
 
-    exitGame();
+  exitGame();
 
-    // Redirect to Tivoli (or parent app)
-    const tivoliUrl =
-      import.meta.env.VITE_TIVOLI_REDIRECT_URL || "https://loopland.se/";
-    window.location.href = tivoliUrl;
-  }, [exitGame]);
+  // If running inside iframe → ask parent to close modal
+  if (window.parent !== window) {
+    window.parent.postMessage(
+      { type: "AMUSEMENT_CLOSE" },
+      "https://loopland.se"
+    );
+    return;
+  }
+
+  // Fallback if opened directly
+  const tivoliUrl =
+    import.meta.env.VITE_TIVOLI_REDIRECT_URL || "https://loopland.se/";
+
+  window.location.href = tivoliUrl;
+}, [exitGame]);
 
   /*
     PLAY AGAIN
