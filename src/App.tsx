@@ -320,7 +320,7 @@ export default function App() {
 
     // Redirect to Tivoli (or parent app)
     const tivoliUrl =
-      import.meta.env.VITE_TIVOLI_REDIRECT_URL || "https://tivoli.wm.local";
+      import.meta.env.VITE_TIVOLI_REDIRECT_URL || "https://loopland.se/";
     window.location.href = tivoliUrl;
   }, [exitGame]);
 
