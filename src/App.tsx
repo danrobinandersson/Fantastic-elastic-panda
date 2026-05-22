@@ -21,9 +21,11 @@ import "./App.css";
 
 import { defaultSceneConfig } from "./config/sceneConfig";
 import { api } from "./api";
-import ControlsHint from "./components/ui/ControlsHint";import { validateAndPayout, createGameSession } from "./api/supabaseGameClient";
+import ControlsHint from "./components/ui/ControlsHint";
+import { validateAndPayout, createGameSession } from "./api/supabaseGameClient";
 import ResetButton from "./components/ui/ResetButton";
 
+import type { IdentityUser } from "./api/types";
 
 export default function App() {
   /*
@@ -42,9 +44,7 @@ export default function App() {
   /* Add player / token / transaction state */
 
   const [identityToken, setIdentityToken] = useState<string | null>(null);
-  const [player, setPlayer] = useState<{ id: string; name: string } | null>(
-    null,
-  );
+  const [player, setPlayer] = useState<IdentityUser | null>(null);
   const [transactionId, setTransactionId] = useState<number>(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -64,7 +64,7 @@ export default function App() {
           // Use mock identity if VITE_USE_MOCK_API is true
           if (import.meta.env.VITE_USE_MOCK_API === "true") {
             const mockIdentity = {
-              user: { id: "mock-user", name: "Test Player" },
+              user: { id: 9999, name: "Test Player" },
             };
             setPlayer(mockIdentity.user);
             // Generate unique mock token for each session (to satisfy UNIQUE constraint on identity_token)
@@ -229,12 +229,14 @@ export default function App() {
       ) {
         const payoutAmount =
           finalScore >= 98
-            ? config.price * 5     // near-perfect: 98+
+            ? config.price * 5 // near-perfect: 98+
             : finalScore >= config.doubleWinThreshold
-              ? config.price * 2   // great: 93-97
-              : config.price;      // money back: 90-92
+              ? config.price * 2 // great: 93-97
+              : config.price; // money back: 90-92
 
-        console.log(`Payout calculation: score=${finalScore}, price=${config.price}, payout=${payoutAmount}`);
+        console.log(
+          `Payout calculation: score=${finalScore}, price=${config.price}, payout=${payoutAmount}`,
+        );
 
         try {
           console.log("Calling validateAndPayout with:", {
@@ -321,7 +323,8 @@ export default function App() {
     exitGame();
 
     // Redirect to Tivoli (or parent app)
-    const tivoliUrl = import.meta.env.VITE_TIVOLI_REDIRECT_URL || "https://tivoli.wm.local";
+    const tivoliUrl =
+      import.meta.env.VITE_TIVOLI_REDIRECT_URL || "https://tivoli.wm.local";
     window.location.href = tivoliUrl;
   }, [exitGame]);
 
@@ -350,9 +353,17 @@ export default function App() {
         amount: config.price,
       });
 
-      setTransactionId(parseInt(transaction.id, 10));
-      setRewardToken(transaction.stamp);
+      setTransactionId(transaction.transaction_id);
 
+      if (transaction.stamp) {
+        const stampText = transaction.stamp.metal
+          ? `${transaction.stamp.metal} ${transaction.stamp.animal}`
+          : transaction.stamp.animal;
+
+        setRewardToken(stampText);
+      } else {
+        setRewardToken("No stamp this round");
+      }
       // Create a new Supabase session for this game
       const sessionResult = await createGameSession(
         identityToken,
@@ -376,8 +387,8 @@ export default function App() {
       setTargetSpinTrigger((v) => v + 1);
 
       // Exit game state and start new game
-      exitGame();
       startGame();
+      setIsStarting(false);
     } catch (err) {
       console.error("Play again error:", err);
       setApiError("Could not start new game.");
@@ -460,24 +471,22 @@ export default function App() {
 
           <div className="overlay-ui">
             <div className="UI-top-row">
-            {/* TIMER / HIGHSCORE BUTTON */}
+              {/* TIMER / HIGHSCORE BUTTON */}
 
-            {phase === "playing" ? (
-              <Timer
-                duration={config.timerSeconds ?? 15}
-                isRunning={phase === "playing"}
-                onComplete={handleGameComplete}
-                compact
-              />
-            ) : (
-              <HighscoreButton onClick={() => setShowScoreboard(true)} />
-            )}
-<ResetButton onClick={handleReset} />
-          </div>
-
-          //////
+              {phase === "playing" ? (
+                <Timer
+                  duration={config.timerSeconds ?? 15}
+                  isRunning={phase === "playing"}
+                  onComplete={handleGameComplete}
+                  compact
+                />
+              ) : (
+                <HighscoreButton onClick={() => setShowScoreboard(true)} />
+              )}
+              <ResetButton onClick={handleReset} />
+            </div>
+            //////
             {/* TARGET WINDOW */}
-
             <div className={styles.targetWindow}>
               <h2 className={styles.windowText}>TARGET</h2>
 
@@ -511,77 +520,80 @@ export default function App() {
           </div>
         </div>
       </div>
-                  {/* BUTTONS */}
+      {/* BUTTONS */}
 
-            <div className="bottom-controls">
-              {phase !== "playing" && !isStarting && (
-                <Button
-                  onClick={async () => {
-                    {
-                      handleReset();
-                    }
+      <div className="bottom-controls">
+        {phase !== "playing" && !isStarting && (
+          <Button
+            onClick={async () => {
+              {
+                handleReset();
+              }
 
-                    if (showTutorial) {
-                      setShowTutorial(true);
-                      return;
-                    }
+              if (showTutorial) {
+                setShowTutorial(true);
+                return;
+              }
 
-                    if (isStarting) return;
+              if (isStarting) return;
 
-                    if (!identityToken) {
-                      setApiError("Missing identity token.");
-                      return;
-                    }
+              if (!identityToken) {
+                setApiError("Missing identity token.");
+                return;
+              }
 
-                    try {
-                      setIsStarting(true);
+              try {
+                setIsStarting(true);
 
-                      const transaction = await api.createTransaction({
-                        identity_token: identityToken,
-                        amount: config.price,
-                      });
+                const transaction = await api.createTransaction({
+                  identity_token: identityToken,
+                  amount: config.price,
+                });
 
-                      setTransactionId(parseInt(transaction.id, 10));
-                      setRewardToken(transaction.stamp);
+                setTransactionId(transaction.transaction_id);
 
-                      // Create a Supabase session for this game
-                      const sessionResult = await createGameSession(
-                        identityToken,
-                        blendshapesRef.current,
-                      );
+                if (transaction.stamp) {
+                  const stampText = transaction.stamp.metal
+                    ? `${transaction.stamp.metal} ${transaction.stamp.animal}`
+                    : transaction.stamp.animal;
 
-                      if (sessionResult) {
-                        setSessionId(sessionResult.sessionId);
-                        console.log(
-                          "Game session created:",
-                          sessionResult.sessionId,
-                        );
-                      }
+                  setRewardToken(stampText);
+                } else {
+                  setRewardToken("No stamp this round");
+                }
+                // Create a Supabase session for this game
+                const sessionResult = await createGameSession(
+                  identityToken,
+                  blendshapesRef.current,
+                );
 
-                      const newTarget = randomFace();
+                if (sessionResult) {
+                  setSessionId(sessionResult.sessionId);
+                  console.log("Game session created:", sessionResult.sessionId);
+                }
 
-                      setTarget(newTarget);
-                      targetRef.current = newTarget;
+                const newTarget = randomFace();
 
-                      setScore(null);
-                      setTargetSpinTrigger((v) => v + 1);
+                setTarget(newTarget);
+                targetRef.current = newTarget;
 
-                      startGame();
-                    } catch (err) {
-                      console.error("Transaction/create error", err);
-                      setApiError("Could not create transaction.");
-                      setIsStarting(false);
-                    }
-                  }}
-                >
-                  Play
-                </Button>
-              )}
-              <ControlsHint onOpenTutorial={() => setShowTutorial(true)} />
+                setScore(null);
+                setTargetSpinTrigger((v) => v + 1);
 
-
-
-            </div>
+                startGame();
+                setIsStarting(false);
+              } catch (err) {
+                console.error("Transaction/create error", err);
+                setApiError("Could not create transaction.");
+                setIsStarting(false);
+              }
+            }}
+          >
+            Play
+          </Button>
+        )}
+        <ControlsHint onOpenTutorial={() => setShowTutorial(true)} />
+      </div>
     </main>
   );
 }
