@@ -1,7 +1,7 @@
-import React, { useRef } from 'react'
+import React, { useRef, useEffect } from 'react'
 import * as THREE from 'three'
 import { useGLTF } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import type { GLTF } from 'three-stdlib'
 import { stepSpring, useSpringStates } from '../../hooks/useSpring'
 import type { SpringConfig } from '../../hooks/useSpring'
@@ -25,13 +25,84 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
   const { values = {}, springConfig, ...groupProps } = props
   const { nodes, materials } = useGLTF('/panda.glb') as unknown as GLTFResult
   const meshRef = useRef<THREE.Mesh>(null)
+  
   const springs = useSpringStates(MORPH_KEYS)
   const { updateBlink } = useBlinkAnimation()
   materials.Panda.vertexColors = false
+ 
+  // Eye tracking constants
+  const EYE_X_AMOUNT = 1.5
+  const EYE_Y_AMOUNT = 1.5
+  const EYE_ROTATION_AMOUNT = -0.3
+
+
+  // Eye tracking refs and state
+const eyeLRef = useRef<THREE.Mesh>(null)
+const eyeRRef = useRef<THREE.Mesh>(null)
+const targetEyeRotation = useRef({ x: 0, y: 0 })
+const eyeRotation = useRef({ x: 0, y: 0 })
+const pointerTarget = useRef({ x: 0, y: 0 })
+
+useEffect(() => {
+  const updatePointer = (event: PointerEvent) => {
+    pointerTarget.current.x = (event.clientX / window.innerWidth) * 2 - 1
+    pointerTarget.current.y = -((event.clientY / window.innerHeight) * 2 - 1)
+  }
+
+  window.addEventListener('pointermove', updatePointer)
+  window.addEventListener('pointerdown', updatePointer)
+
+  return () => {
+    window.removeEventListener('pointermove', updatePointer)
+    window.removeEventListener('pointerdown', updatePointer)
+  }
+}, [])
+
+
 
   useFrame((_, delta) => {
-    const mesh = meshRef.current
-    if (!mesh?.morphTargetDictionary) return
+targetEyeRotation.current.x = pointerTarget.current.x * EYE_X_AMOUNT
+targetEyeRotation.current.y = -pointerTarget.current.y * EYE_Y_AMOUNT
+
+eyeRotation.current.x = THREE.MathUtils.damp(
+  eyeRotation.current.x,
+  targetEyeRotation.current.x,
+  10,// The higher the damping, the snappier the eyes will follow the pointer (but also more jittery) - adjust to your liking
+  delta
+)
+
+eyeRotation.current.y = THREE.MathUtils.damp(
+  eyeRotation.current.y,
+  targetEyeRotation.current.y,
+  10, // The higher the damping, the snappier the eyes will follow the pointer (but also more jittery) - adjust to your liking
+  delta
+)
+
+if (eyeRRef.current) {
+  eyeRRef.current.position.x = 31 + eyeRotation.current.x
+  eyeRRef.current.position.z = 5.72 + eyeRotation.current.y
+
+  eyeRRef.current.rotation.z =
+    eyeRotation.current.x * EYE_ROTATION_AMOUNT
+
+  eyeRRef.current.rotation.x =
+    -eyeRotation.current.y * EYE_ROTATION_AMOUNT
+}
+
+if (eyeLRef.current) {
+  eyeLRef.current.position.x = -31 + eyeRotation.current.x
+  eyeLRef.current.position.z = 5.72 + eyeRotation.current.y
+
+  eyeLRef.current.rotation.z =
+    eyeRotation.current.x * EYE_ROTATION_AMOUNT
+
+  eyeLRef.current.rotation.x =
+    -eyeRotation.current.y * EYE_ROTATION_AMOUNT
+}
+
+const mesh = meshRef.current
+if (!mesh?.morphTargetDictionary) return
+
 
     // Initialize morphTargetInfluences if needed
     if (!mesh.morphTargetInfluences) {
@@ -73,24 +144,24 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
           position={[0, 62.02, 29.72]}
           receiveShadow={props.receiveShadow}
           castShadow={props.castShadow}
-        >
+        />
 
 
 <mesh
+  ref={eyeRRef}
   geometry={nodes.EyeR.geometry}
-  position={[31, 14, -24]}
+  position={[31, 76.02, 6.72]}
   material={materials.Panda}
   scale={[1, 1, 1]}
-
 />
 
 <mesh
+  ref={eyeLRef}
   geometry={nodes.EyeL.geometry}
-  position={[-31, 14, -24]}
+  position={[-31, 76.02, 6.72]}
   material={materials.Panda}
   scale={[1, 1, 1]}
 />
-
 
 
 
@@ -108,7 +179,6 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
 
 >*/}
 
-</mesh>
       </group>
     </group>
   );
