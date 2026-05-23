@@ -31,7 +31,7 @@ export const PlayerPanda = React.forwardRef<THREE.Group, PlayerPandaProps>((prop
   materials.Panda.vertexColors = false
  
   // Eye tracking constants
-  const EYE_X_AMOUNT = 1.5
+  const EYE_X_AMOUNT = 1.0
   const EYE_Y_AMOUNT = 1.5
   const EYE_ROTATION_AMOUNT = -0.3
 
