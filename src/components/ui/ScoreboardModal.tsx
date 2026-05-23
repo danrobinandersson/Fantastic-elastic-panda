@@ -3,9 +3,9 @@ import Button from "./Button";
 import Modal from "./Modal";
 
 type Score = {
+  centralbank_user_id: string;
   player_name: string;
   score: number;
-  token: string | null;
   created_at: string;
 };
 
@@ -13,14 +13,25 @@ type ScoreboardModalProps = {
   onClose: () => void;
 };
 
+const SCOREBOARD_API_URL = import.meta.env.VITE_SCOREBOARD_API_URL;
+
 export default function ScoreboardModal({ onClose }: ScoreboardModalProps) {
   const [scores, setScores] = useState<Score[]>([]);
 
   useEffect(() => {
     async function loadScores() {
-      const response = await fetch("http://localhost:3001/scores");
-      const data = await response.json();
-      setScores(data);
+      try {
+        const response = await fetch(`${SCOREBOARD_API_URL}/scores`);
+
+        if (!response.ok) {
+          throw new Error("Failed to load scores");
+        }
+
+        const data = await response.json();
+        setScores(data);
+      } catch (error) {
+        console.error("Could not load scoreboard:", error);
+      }
     }
 
     loadScores();
@@ -29,9 +40,13 @@ export default function ScoreboardModal({ onClose }: ScoreboardModalProps) {
   return (
     <Modal onExit={onClose} labelId="scoreboard-title">
       <h2 id="scoreboard-title">Scoreboard</h2>
+
       <div style={{ marginBottom: "2rem" }}>
         {scores.map((score, index) => (
-          <div key={index} style={{ margin: "0.5rem 0", color: "white" }}>
+          <div
+            key={score.centralbank_user_id}
+            style={{ margin: "0.5rem 0", color: "white" }}
+          >
             <strong>
               {index + 1}. {score.player_name}
             </strong>{" "}
@@ -39,6 +54,7 @@ export default function ScoreboardModal({ onClose }: ScoreboardModalProps) {
           </div>
         ))}
       </div>
+
       <Button onClick={onClose}>Close</Button>
     </Modal>
   );
