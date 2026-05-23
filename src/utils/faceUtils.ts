@@ -107,10 +107,10 @@ export function scoreMatch(
   const avgError = sumError / CONTROLLABLE_MORPH_KEYS.length
 
   // ORIGINAL SCORE (unchanged gameplay difficulty)
-  const rawScore = Math.max(
-    0,
-    Math.round((1 - avgError) * 100)
-  )
+const rawScore = Math.max(
+  0,
+  Number(((1 - avgError) * 100).toFixed(2))
+);
 
   // REMAPPED DISPLAY SCORE
   return remapScore(rawScore)
