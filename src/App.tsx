@@ -287,12 +287,12 @@ export default function App() {
       setFreezeControls(false);
       finalizeTimeoutRef.current = null;
     }, 600);
-  }, [finishGame, transactionId, identityToken, sessionId, config, player]);
+  }, [finishGame, transactionId, identityToken, sessionId, config, _player]);
 
   /* Scoreboard */
 
   async function saveScore(finalScore: number) {
-    if (!player) {
+    if (!_player) {
       console.error("No player found, cannot save score");
       return;
     }
@@ -303,8 +303,8 @@ export default function App() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        centralbankUserId: String(player.id),
-        playerName: player.name,
+        centralbankUserId: String(_player.id),
+        playerName: _player.name,
         score: finalScore,
       }),
     });
