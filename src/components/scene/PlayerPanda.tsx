@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react'
 import * as THREE from 'three'
 import { useGLTF } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import type { GLTF } from 'three-stdlib'
 import { stepSpring, useSpringStates } from '../../hooks/useSpring'
 import type { SpringConfig } from '../../hooks/useSpring'
