@@ -43,6 +43,15 @@ export default function App() {
   const [transactionId, setTransactionId] = useState<number>(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [_apiError, setApiError] = useState<string | null>(null);
+  const [isGuestMode] = useState(false);
+  const [stamp, setStamp] = useState<{
+  animal: string | null;
+  metal: string | null;
+  image_url: string | null;
+} | null>(null);
+
+
+
 
   /* Read identity token when app loads */
   useEffect(() => {
@@ -201,93 +210,78 @@ export default function App() {
   const [isStarting, setIsStarting] = useState(false);
   const [freezeControls, setFreezeControls] = useState(false);
 
-  const handleGameComplete = useCallback(() => {
-    setFreezeControls(true);
+const handleGameComplete = useCallback(() => {
+  setFreezeControls(true);
 
-    if (finalizeTimeoutRef.current) {
-      window.clearTimeout(finalizeTimeoutRef.current);
-      finalizeTimeoutRef.current = null;
+  if (finalizeTimeoutRef.current) {
+    window.clearTimeout(finalizeTimeoutRef.current);
+    finalizeTimeoutRef.current = null;
+  }
+
+  finalizeTimeoutRef.current = window.setTimeout(async () => {
+    const finalScore = scoreMatch(targetRef.current, blendshapesRef.current);
+
+    setScore(finalScore);
+    await saveScore(finalScore);
+
+    console.log("Final score:", finalScore);
+
+    if (
+      !isGuestMode &&
+      sessionId &&
+      identityToken &&
+      finalScore >= config.moneyBackThreshold
+    ) {
+      const payoutAmount =
+        finalScore >= 95
+          ? config.price * 5
+          : finalScore >= 90
+            ? config.price * 2
+            : config.price;
+
+      try {
+        const result = await validateAndPayout({
+          sessionId,
+          identityToken,
+          playerBlendshapes: blendshapesRef.current,
+          targetBlendshapes: targetRef.current,
+          tivoliTransactionId: transactionId || 0,
+          payoutAmount,
+        });
+
+        console.log("Edge Function response:", result);
+
+        if (result.error) {
+          console.error("Edge Function error:", result.error);
+        } else {
+          if (result.data?.payoutSuccess) {
+            setRewardToken(`💰 +€${payoutAmount.toFixed(2)}`);
+          }
+
+          if (result.data?.stamp) {
+            setStamp(result.data.stamp);
+          }
+        }
+      } catch (err) {
+        console.error("Edge Function call error", err);
+        setRewardToken("Payment processing...");
+      }
     }
 
-    finalizeTimeoutRef.current = window.setTimeout(async () => {
-      const finalScore = scoreMatch(targetRef.current, blendshapesRef.current);
+    finishGame(finalScore);
+    setFreezeControls(false);
+    finalizeTimeoutRef.current = null;
+  }, 600);
+}, [
+  finishGame,
+  transactionId,
+  identityToken,
+  sessionId,
+  config,
+  _player,
+  isGuestMode,
+]);
 
-      setScore(finalScore);
-
-      await saveScore(finalScore);
-
-      console.log("Final score:", finalScore);
-
-      // Call Supabase Edge Function for validated payout
-      if (
-        sessionId &&
-        identityToken &&
-        finalScore >= config.moneyBackThreshold
-      ) {
-        const payoutAmount =
-          finalScore >= 98
-            ? config.price * 5 // near-perfect: 98+
-            : finalScore >= config.doubleWinThreshold
-              ? config.price * 2 // great: 93-97
-              : config.price; // money back: 90-92
-
-        console.log(
-          `Payout calculation: score=${finalScore}, price=${config.price}, payout=${payoutAmount}`,
-        );
-
-        try {
-          console.log("Calling validateAndPayout with:", {
-            sessionId,
-            identityToken,
-            playerBlendshapes: blendshapesRef.current,
-            targetBlendshapes: targetRef.current,
-            tivoliTransactionId: transactionId || 0,
-            payoutAmount,
-          });
-
-          const result = await validateAndPayout({
-            sessionId: sessionId,
-            identityToken: identityToken,
-            playerBlendshapes: blendshapesRef.current,
-            targetBlendshapes: targetRef.current,
-            tivoliTransactionId: transactionId || 0,
-            payoutAmount: payoutAmount,
-          });
-
-          console.log("Edge Function response:", result);
-
-          if (result.error) {
-            console.error("Edge Function error:", result.error);
-            // Check if it's a rate limit error object
-            if (
-              typeof result.error === "object" &&
-              "remainingRequests" in result.error
-            ) {
-              console.warn(
-                "Rate limited. Remaining requests:",
-                result.error.remainingRequests,
-              );
-            }
-          } else {
-            const serverScore = result.data?.validatedScore;
-            console.log("Payout successful. Validated score:", serverScore);
-            if (result.data?.payoutSuccess) {
-              setRewardToken(`💰 +€${payoutAmount.toFixed(2)}`);
-            }
-          }
-        } catch (err) {
-          console.error("Edge Function call error", err);
-          setRewardToken("Payment processing...");
-        }
-      }
-
-      console.log("Payout complete");
-
-      finishGame(finalScore);
-      setFreezeControls(false);
-      finalizeTimeoutRef.current = null;
-    }, 600);
-  }, [finishGame, transactionId, identityToken, sessionId, config, _player]);
 
   /* Scoreboard */
 
@@ -443,14 +437,17 @@ export default function App() {
   return (
     <main>
       {phase === "finished" && (
-        <GameResultModal
-          score={score}
-          token={rewardToken}
-          config={config}
-          onPlayAgain={handlePlayAgain}
-          onReturnToTivoli={handleReturnToTivoli}
-          onShowHighScores={() => setShowScoreboard(true)}
-        />
+<GameResultModal
+  score={score}
+  token={rewardToken}
+  stamp={stamp}
+  isGuestMode={isGuestMode}
+  config={config}
+  onPlayAgain={handlePlayAgain}
+  onReturnToTivoli={handleReturnToTivoli}
+  onShowHighScores={() => setShowScoreboard(true)}
+  
+/>
       )}
 
       {showScoreboard && (
@@ -577,6 +574,7 @@ export default function App() {
                 });
 
                 setTransactionId(transaction.transaction_id);
+                setStamp(transaction.stamp ?? null);
 
                 if (transaction.stamp) {
                   const stampText = transaction.stamp.metal

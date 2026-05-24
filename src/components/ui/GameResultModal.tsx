@@ -2,9 +2,17 @@ import Modal from "./Modal";
 import Button from "./Button";
 import { useEffect, useState } from "react";
 
+type Stamp = {
+  animal: string | null;
+  metal: string | null;
+  image_url: string | null;
+};
+
 type GameResultModalProps = {
   score: number | null;
   token: string | null;
+  stamp?: Stamp | null;
+  isGuestMode?: boolean;
   config: {
     doubleWinThreshold: number;
     moneyBackThreshold: number;
@@ -17,6 +25,8 @@ type GameResultModalProps = {
 export default function GameResultModal({
   score,
   token,
+  stamp,
+  isGuestMode = false,
   config: _config,
   onPlayAgain,
   onReturnToTivoli,
@@ -39,9 +49,13 @@ export default function GameResultModal({
 
     function step(t: number) {
       const p = Math.min(1, (t - start) / duration);
-      const v = Math.round(from + (to - from) * p);
+      const v = Number((from + (to - from) * p).toFixed(2));
+
       setDisplayed(v);
-      if (p < 1) raf = requestAnimationFrame(step);
+
+      if (p < 1) {
+        raf = requestAnimationFrame(step);
+      }
     }
 
     raf = requestAnimationFrame(step);
@@ -49,41 +63,66 @@ export default function GameResultModal({
     return () => cancelAnimationFrame(raf);
   }, [score]);
 
-function getFeedbackMessage() {
-  if (score === null) return "";
+  function getFeedbackMessage() {
+    if (score === null) return "";
 
-  if (score >= 95) {
-    return "LEGENDARY! 5x payout!";
+    if (score >= 95) return "LEGENDARY! 5x payout!";
+    if (score >= 90) return "Amazing! Double win!";
+    if (score >= 85) return "Nice! You got your money back!";
+
+    return "Better luck next time!";
   }
-
-  if (score >= 90) {
-    return "Amazing! Double win!";
-  }
-
-  if (score >= 85) {
-    return "Nice! You got your money back!";
-  }
-
-  return "Better luck next time!";
-}
 
   return (
     <Modal onExit={onReturnToTivoli} labelId="game-result-title">
       <h2 id="game-result-title">Time's up!</h2>
-      <p>Your score: {displayed ?? "–"}</p>
+
+      <p>Your score: {displayed !== null ? displayed.toFixed(2) : "–"}</p>
+
       <p>{getFeedbackMessage()}</p>
-      {token ? (
-        <p>You received: <strong>{token}</strong></p>
+
+      {isGuestMode ? (
+        <p>Practice mode — no stamps or rewards earned.</p>
       ) : (
-        <p>Generating reward...</p>
+        <>
+          {token ? (
+            <p>
+              You received: <strong>{token}</strong>
+            </p>
+          ) : (
+            <p>Generating reward...</p>
+          )}
+
+          {stamp?.image_url && (
+            <div>
+              <p>You received a stamp!</p>
+
+              <img
+                src={stamp.image_url}
+                alt={`${stamp.animal ?? "Mystery"} stamp`}
+                style={{
+                  width: "120px",
+                  height: "120px",
+                  objectFit: "contain",
+                }}
+              />
+
+              <p>
+                {stamp.animal && <span>{stamp.animal}</span>}
+                {stamp.metal && <span> · {stamp.metal}</span>}
+              </p>
+            </div>
+          )}
+        </>
       )}
-      <Button onClick={onShowHighScores} variant="secondary">High Scores</Button>
+
+      <Button onClick={onShowHighScores} variant="secondary">
+        High Scores
+      </Button>
+
       <Button onClick={onPlayAgain}>Play Again</Button>
-<Button
-  onClick={onReturnToTivoli}
->
-  Back to Loopland
-</Button>
+
+      <Button onClick={onReturnToTivoli}>Back to Loopland</Button>
     </Modal>
   );
 }

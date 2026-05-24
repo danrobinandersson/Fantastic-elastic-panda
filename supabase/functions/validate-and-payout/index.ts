@@ -1,3 +1,4 @@
+/// <reference lib="deno.ns" />
 // Supabase Edge Function: validate-and-payout
 // Purpose: Authoritative server-side game validation + orchestrated payout flow
 // URL: POST /functions/v1/validate-and-payout
@@ -55,6 +56,15 @@ interface Constraint {
   min?: (current: Record<string, number>) => number;
   max?: (current: Record<string, number>) => number;
 }
+
+
+interface Stamp {
+  animal: string | null;
+  metal: string | null;
+  image_url: string | null;
+}
+
+
 
 // Constraints from frontend controlConstraints.ts
 // Enforces mutually exclusive movements (up/down, left/right)
@@ -131,7 +141,6 @@ function applyConstraints(values: Record<string, number>): Record<string, number
 // Rate limit constants (tunable)
 const RATE_LIMIT_WINDOW_SECONDS = 60;
 const MAX_REQUESTS_PER_MINUTE = 10;
-const COOLDOWN_AFTER_PAYOUT_SECONDS = 5;
 
 interface ValidatePayoutRequest {
   sessionId: string;
@@ -139,13 +148,47 @@ interface ValidatePayoutRequest {
   playerBlendshapes: Record<string, number>;
   targetBlendshapes: Record<string, number>;
   tivoliTransactionId: number;
-  payoutAmount: number;
 }
 
 interface RateLimitResult {
   allowed: boolean;
   remainingRequests: number;
   resetSeconds: number;
+}
+
+function remapScore(raw: number): number {
+  const points: [number, number][] = [
+    [0, 0],
+    [90, 85],
+    [93, 90],
+    [98, 95],
+    [100, 100],
+  ];
+
+  for (let i = 1; i < points.length; i++) {
+    const [x1, y1] = points[i - 1];
+    const [x2, y2] = points[i];
+
+    if (raw <= x2) {
+      const t = (raw - x1) / (x2 - x1);
+
+      return Number(
+        (y1 + t * (y2 - y1)).toFixed(2)
+      );
+    }
+  }
+
+  return raw;
+}
+
+function getValidatedPayout(score: number): number {
+  if (score >= 95) return 5;
+
+  if (score >= 90) return 2;
+
+  if (score >= 85) return 1;
+
+  return 0;
 }
 
 function scoreMatch(
@@ -156,13 +199,25 @@ function scoreMatch(
 
   for (const key of CONTROLLABLE_MORPH_KEYS) {
     const max = getBlendshapeMaxValue(key);
-    const targetVal = ((targetShapes[key] ?? 0) / max);
-    const playerVal = ((playerShapes[key] ?? 0) / max);
+
+    const targetVal =
+      (targetShapes[key] ?? 0) / max;
+
+    const playerVal =
+      (playerShapes[key] ?? 0) / max;
+
     sumError += Math.abs(targetVal - playerVal);
   }
 
-  const avgError = sumError / CONTROLLABLE_MORPH_KEYS.length;
-  return Math.max(0, Math.round((1 - avgError) * 100));
+  const avgError =
+    sumError / CONTROLLABLE_MORPH_KEYS.length;
+
+  const rawScore = Math.max(
+    0,
+    Number(((1 - avgError) * 100).toFixed(2))
+  );
+
+  return remapScore(rawScore);
 }
 
 async function checkRateLimit(userId: string, requestType: string): Promise<RateLimitResult> {
@@ -203,7 +258,7 @@ async function recordRateLimitAttempt(userId: string, requestType: string): Prom
 async function processPayout(
   tivoliTransactionId: number,
   payoutAmount: number,
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; stamp?: Stamp; error?: string }> {
   try {
     const response = await fetch(`${CENTRALBANK_BASE_URL}/transactions/${tivoliTransactionId}/payout`, {
       method: "POST",
@@ -214,14 +269,24 @@ async function processPayout(
       }),
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const error = await response.text();
-      return { success: false, error: `Centralbank payout failed: ${error}` };
+      return {
+        success: false,
+        error: `Centralbank payout failed: ${JSON.stringify(data)}`,
+      };
     }
 
-    return { success: true };
+    return {
+      success: true,
+      stamp: data.stamp ?? undefined,
+    };
   } catch (error) {
-    return { success: false, error: `Payout network error: ${error}` };
+    return {
+      success: false,
+      error: `Payout network error: ${error}`,
+    };
   }
 }
 
@@ -247,18 +312,22 @@ serve(async (req) => {
   try {
     const body = (await req.json()) as ValidatePayoutRequest;
 
-    const { sessionId, identityToken, playerBlendshapes, targetBlendshapes, tivoliTransactionId, payoutAmount } =
-      body;
+const {
+  sessionId,
+  identityToken,
+  playerBlendshapes,
+  targetBlendshapes,
+  tivoliTransactionId,
+} = body;
 
-    if (
-      !sessionId ||
-      !identityToken ||
-      !playerBlendshapes ||
-      !targetBlendshapes ||
-      tivoliTransactionId === null ||
-      tivoliTransactionId === undefined ||
-      payoutAmount === undefined
-    ) {
+if (
+  !sessionId ||
+  !identityToken ||
+  !playerBlendshapes ||
+  !targetBlendshapes ||
+  tivoliTransactionId === null ||
+  tivoliTransactionId === undefined
+) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: corsHeaders },
@@ -400,73 +469,100 @@ serve(async (req) => {
     const constrainedTarget = applyConstraints({ ...targetBlendshapes });
     const constrainedPlayer = applyConstraints({ ...playerBlendshapes });
     
-    const validatedScore = scoreMatch(constrainedTarget, constrainedPlayer);
-    console.log(`Validated score: ${validatedScore}`);
+const validatedScore = scoreMatch(
+  constrainedTarget,
+  constrainedPlayer
+);
 
-    // Update session with validated score and mark as completed
-    const { error: updateError } = await supabase
-      .from("game_sessions")
-      .update({
-        game_state: "completed",
-        score_validated: validatedScore,
-        completed_at: new Date().toISOString(),
-      })
-      .eq("id", sessionId);
+const validatedPayoutAmount =
+  getValidatedPayout(validatedScore);
 
-    if (updateError) {
-      console.error("Failed to update session:", updateError);
-      throw new Error("Failed to update game session");
-    }
+console.log(`Validated score: ${validatedScore}`);
+console.log(
+  `Validated payout: ${validatedPayoutAmount}x`
+);
 
-    // Record rate limit attempt for payout
-    await recordRateLimitAttempt(userId, "request_payout");
+// Update session
+const { error: updateError } = await supabase
+  .from("game_sessions")
+  .update({
+    game_state: "completed",
+    score_validated: validatedScore,
+    completed_at: new Date().toISOString(),
+  })
+  .eq("id", sessionId);
 
-    // If payout amount > 0, process payout
-    let payoutResult: { success: boolean; error?: string } = { success: false, error: "No payout requested" };
-    if (payoutAmount > 0) {
-      payoutResult = await processPayout(tivoliTransactionId, payoutAmount);
+if (updateError) {
+  console.error(
+    "Failed to update session:",
+    updateError
+  );
 
-      if (payoutResult.success) {
-        const { error: payoutRecordError } = await supabase
-          .from("payout_history")
-          .insert({
-            session_id: sessionId,
-            user_id: userId,
-            tivoli_transaction_id: tivoliTransactionId,
-            amount: payoutAmount,
-            status: "success",
-            completed_at: new Date().toISOString(),
-          });
+  throw new Error(
+    "Failed to update game session"
+  );
+}
 
-        if (payoutRecordError) {
-          console.error("Failed to record payout:", payoutRecordError);
-        }
-      } else {
-        const { error: payoutRecordError } = await supabase
-          .from("payout_history")
-          .insert({
-            session_id: sessionId,
-            user_id: userId,
-            tivoli_transaction_id: tivoliTransactionId,
-            amount: payoutAmount,
-            status: "failed",
-            error_message: payoutResult.error,
-            completed_at: new Date().toISOString(),
-          });
+// Record rate limit attempt
+await recordRateLimitAttempt(
+  userId,
+  "request_payout"
+);
 
-        if (payoutRecordError) {
-          console.error("Failed to record failed payout:", payoutRecordError);
-        }
-      }
-    }
+// Process payout
+let payoutResult: {
+  success: boolean;
+  stamp?: Stamp;
+  error?: string;
+} = {
+  success: false,
+  error: "No payout requested",
+};
 
+if (
+  validatedPayoutAmount > 0 &&
+  tivoliTransactionId !== 0
+) {
+  payoutResult = await processPayout(
+    tivoliTransactionId,
+    validatedPayoutAmount
+  );
+
+  const payoutStatus =
+    payoutResult.success
+      ? "success"
+      : "failed";
+
+  const { error: payoutRecordError } =
+    await supabase
+      .from("payout_history")
+      .insert({
+        session_id: sessionId,
+        user_id: userId,
+        tivoli_transaction_id:
+          tivoliTransactionId,
+        amount: validatedPayoutAmount,
+        status: payoutStatus,
+        error_message: payoutResult.error,
+        completed_at:
+          new Date().toISOString(),
+      });
+
+  if (payoutRecordError) {
+    console.error(
+      "Failed to record payout:",
+      payoutRecordError
+    );
+  }
+}
     return new Response(
       JSON.stringify({
         sessionId,
         validatedScore,
-        payoutRequested: payoutAmount,
+        payoutRequested: validatedPayoutAmount,
         payoutSuccess: payoutResult.success,
         payoutError: payoutResult.error,
+        stamp: payoutResult.stamp ?? null,
       }),
       { status: 200, headers: corsHeaders },
     );

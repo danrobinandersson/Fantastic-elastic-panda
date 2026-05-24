@@ -22,6 +22,7 @@ export interface ValidatePayoutResponse {
   payoutRequested: number;
   payoutSuccess: boolean;
   payoutError?: string;
+  stamp?: Stamp | null;
 }
 
 export interface RateLimitError {
@@ -29,6 +30,13 @@ export interface RateLimitError {
   remainingRequests: number;
   resetSeconds: number;
 }
+
+export interface Stamp {
+  animal: string | null;
+  metal: string | null;
+  image_url: string | null;
+}
+
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;

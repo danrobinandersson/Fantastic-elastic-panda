@@ -1,7 +1,11 @@
 import { create } from "zustand";
 import type { BlendshapeValues } from "../types/blendshape";
 
-type GamePhase = "idle" | "preview" | "playing" | "finished";
+type GamePhase =
+  | "idle"
+  | "preview"
+  | "playing"
+  | "finished";
 
 type GameConfig = {
   price: number;
@@ -12,61 +16,108 @@ type GameConfig = {
 
 type GameStore = {
   phase: GamePhase;
+
   coins: number;
+
   score: number | null;
+
+  isGuestMode: boolean;
+
   targetBlendshapes: BlendshapeValues;
   playerBlendshapes: BlendshapeValues;
+
   config: GameConfig;
 
-  setPlayerBlendshapes: (values: BlendshapeValues) => void;
-  setTargetBlendshapes: (values: BlendshapeValues) => void;
+  setGuestMode: (value: boolean) => void;
+
+  setPlayerBlendshapes: (
+    values: BlendshapeValues
+  ) => void;
+
+  setTargetBlendshapes: (
+    values: BlendshapeValues
+  ) => void;
+
   startGame: () => void;
+
   finishGame: (score: number) => void;
+
   exitGame: () => void;
-  updateConfig: (config: Partial<GameConfig>) => void;
+
+  updateConfig: (
+    config: Partial<GameConfig>
+  ) => void;
 };
 
-export const useGameStore = create<GameStore>()((set) => ({
-  phase: "idle",
-  coins: 25,
-  score: null,
-  targetBlendshapes: {} as BlendshapeValues,
-  playerBlendshapes: {} as BlendshapeValues,
+export const useGameStore =
+  create<GameStore>()((set) => ({
+    phase: "idle",
 
-  config: {
-    price: 1, // €1 entry cost
-    timerSeconds: 15,
-    doubleWinThreshold: 93, // 93+ = 2x payout
-    moneyBackThreshold: 90, // 90-92 = 1x payout
-  },
+    coins: 25,
 
-  setPlayerBlendshapes: (values) => set({ playerBlendshapes: values }),
-  setTargetBlendshapes: (values) => set({ targetBlendshapes: values }),
+    score: null,
 
-  startGame: () =>
-    set((state) => ({
-      phase: "playing",
-      coins: state.coins - state.config.price,
-      score: null,
-    })),
+    isGuestMode: false,
 
-  finishGame: (score) =>
-    set({
-      phase: "finished",
-      score,
-    }),
+    targetBlendshapes:
+      {} as BlendshapeValues,
 
-  exitGame: () =>
-    set({
-      phase: "idle",
-      score: null,
-    }),
+    playerBlendshapes:
+      {} as BlendshapeValues,
 
-  updateConfig: (config) =>
-    set((state) => ({
-      config: {
-        ...state.config,
-        ...config,
-      },
-    })),
-}));
+    config: {
+      price: 1,
+
+      timerSeconds: 15,
+
+      doubleWinThreshold: 90,
+
+      moneyBackThreshold: 85,
+    },
+
+    setGuestMode: (value) =>
+      set({
+        isGuestMode: value,
+      }),
+
+    setPlayerBlendshapes: (values) =>
+      set({
+        playerBlendshapes: values,
+      }),
+
+    setTargetBlendshapes: (values) =>
+      set({
+        targetBlendshapes: values,
+      }),
+
+    startGame: () =>
+      set((state) => ({
+        phase: "playing",
+
+        coins: state.isGuestMode
+          ? state.coins
+          : state.coins - state.config.price,
+
+        score: null,
+      })),
+
+    finishGame: (score) =>
+      set({
+        phase: "finished",
+        score,
+      }),
+
+    exitGame: () =>
+      set({
+        phase: "idle",
+        score: null,
+      }),
+
+    updateConfig: (config) =>
+      set((state) => ({
+        config: {
+          ...state.config,
+          ...config,
+        },
+      })),
+  }));
