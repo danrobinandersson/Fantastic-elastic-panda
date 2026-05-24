@@ -75,7 +75,7 @@ function remapScore(raw: number): number {
 
     if (raw <= x2) {
       const t = (raw - x1) / (x2 - x1)
-      return Math.round(y1 + t * (y2 - y1))
+      return Number((y1 + t * (y2 - y1)).toFixed(2))
     }
   }
 
