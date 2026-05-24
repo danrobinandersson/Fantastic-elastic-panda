@@ -11,9 +11,9 @@ camera: {
 
   environment: {
     preset: "studio",
-    intensity: 0.07,
+    intensity: 0.1,
     blur: 0.7,
-    rotation: -2,
+    rotation: 3.14,
   },
 
   ambientLight: {
@@ -30,7 +30,7 @@ camera: {
 
   light2: {
     color: "#ba6040",
-    intensity: 0,
+    intensity: 209,
     distance: 17.76,
     decay: 0.8,
     position: [0.3, -4.2, -3.1],
@@ -38,9 +38,9 @@ camera: {
 
   light3: {
     color: "#823f00",
-    intensity: 588,
+    intensity: 607,
     distance: 46.9,
     decay: 1.2,
-    position: [-0.4, 11.8, 13.6  ],
+    position: [-0.4, 8.3, 13.6  ],
   },
 }
