@@ -43,7 +43,7 @@ export default function App() {
   const [transactionId, setTransactionId] = useState<number>(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [_apiError, setApiError] = useState<string | null>(null);
-  const [isGuestMode] = useState(false);
+  const [isGuestMode, setIsGuestMode] = useState(false);
   const [stamp, setStamp] = useState<{
   animal: string | null;
   metal: string | null;
@@ -76,14 +76,17 @@ export default function App() {
             return;
           }
 
-          // Otherwise try to get a real identity with mock token (for testing)
-          const identity = await api.getIdentity("mock-token");
+          // Guest mode
+          setIsGuestMode(true);
 
-          console.log("Mock identity:", identity);
+        setPlayer({
+        id: 0,
+        name: "Guest Player",
+        });
 
-          setPlayer(identity.user);
-          setIdentityToken("mock-token");
-          return;
+        setIdentityToken(null);
+
+return;
         }
 
         setIdentityToken(tokenFromUrl);
@@ -353,28 +356,32 @@ const handleGameComplete = useCallback(() => {
     PLAY AGAIN
   */
   const handlePlayAgain = useCallback(async () => {
-    // Reset per-round state
-    setScore(null);
-    setRewardToken(null);
-    setTransactionId(0);
-    setSessionId(null);
-    setTarget({} as BlendshapeValues);
+  // Reset per-round state
+  setScore(null);
+  setRewardToken(null);
+  setTransactionId(0);
+  setSessionId(null);
+  setTarget({} as BlendshapeValues);
+  setStamp(null);
 
-    if (!identityToken) {
-      setApiError("Missing identity token.");
-      return;
-    }
+  if (!identityToken && !isGuestMode) {
+    setApiError("Missing identity token.");
+    return;
+  }
 
-    try {
-      setIsStarting(true);
+  try {
+    setIsStarting(true);
 
-      // Create new transaction with same identity token
+    // ONLY create transaction in paid mode
+    if (!isGuestMode && identityToken) {
       const transaction = await api.createTransaction({
         identity_token: identityToken,
         amount: config.price,
       });
 
       setTransactionId(transaction.transaction_id);
+
+      setStamp(transaction.stamp ?? null);
 
       if (transaction.stamp) {
         const stampText = transaction.stamp.metal
@@ -385,7 +392,8 @@ const handleGameComplete = useCallback(() => {
       } else {
         setRewardToken("No stamp this round");
       }
-      // Create a new Supabase session for this game
+
+      // Create Supabase session
       const sessionResult = await createGameSession(
         identityToken,
         blendshapesRef.current,
@@ -393,29 +401,33 @@ const handleGameComplete = useCallback(() => {
 
       if (sessionResult) {
         setSessionId(sessionResult.sessionId);
-        console.log("Game session created:", sessionResult.sessionId);
       }
-
-      // Generate new target face
-      const newTarget = randomFace();
-      setTarget(newTarget);
-      targetRef.current = newTarget;
-
-      // Reset player face with spring effect
-      handleReset();
-
-      // Trigger target spin animation
-      setTargetSpinTrigger((v) => v + 1);
-
-      // Exit game state and start new game
-      startGame();
-      setIsStarting(false);
-    } catch (err) {
-      console.error("Play again error:", err);
-      setApiError("Could not start new game.");
-      setIsStarting(false);
     }
-  }, [identityToken, config.price, exitGame, startGame]);
+
+    // Generate target
+    const newTarget = randomFace();
+
+    setTarget(newTarget);
+    targetRef.current = newTarget;
+
+    handleReset();
+
+    setTargetSpinTrigger((v) => v + 1);
+
+    startGame();
+
+    setIsStarting(false);
+  } catch (err) {
+    console.error("Play again error:", err);
+    setApiError("Could not start new game.");
+    setIsStarting(false);
+  }
+}, [
+  identityToken,
+  config.price,
+  startGame,
+  isGuestMode,
+]);
 
   /* Show tutorial on first visit */
   useEffect(() => {
@@ -547,72 +559,72 @@ const handleGameComplete = useCallback(() => {
 
       <div className="bottom-controls">
         {phase !== "playing" && !isStarting && (
-          <PlayButton
-            disabled={isStarting}
-            cost={config.price}
-            onClick={async () => {
-              handleReset();
+<PlayButton
+  disabled={isStarting}
+  cost={config.price}
+  onClick={async () => {
+    handleReset();
 
-              if (showTutorial) {
-                setShowTutorial(true);
-                return;
-              }
+    if (showTutorial) {
+      setShowTutorial(true);
+      return;
+    }
 
-              if (isStarting) return;
+    if (isStarting) return;
 
-              if (!identityToken) {
-                setApiError("Missing identity token.");
-                return;
-              }
+    try {
+      setIsStarting(true);
 
-              try {
-                setIsStarting(true);
+      // Paid mode only
+      if (!isGuestMode && identityToken) {
+        const transaction = await api.createTransaction({
+          identity_token: identityToken,
+          amount: config.price,
+        });
 
-                const transaction = await api.createTransaction({
-                  identity_token: identityToken,
-                  amount: config.price,
-                });
+        setTransactionId(transaction.transaction_id);
 
-                setTransactionId(transaction.transaction_id);
-                setStamp(transaction.stamp ?? null);
+        setStamp(transaction.stamp ?? null);
 
-                if (transaction.stamp) {
-                  const stampText = transaction.stamp.metal
-                    ? `${transaction.stamp.metal} ${transaction.stamp.animal}`
-                    : transaction.stamp.animal;
+        if (transaction.stamp) {
+          const stampText = transaction.stamp.metal
+            ? `${transaction.stamp.metal} ${transaction.stamp.animal}`
+            : transaction.stamp.animal;
 
-                  setRewardToken(stampText);
-                } else {
-                  setRewardToken("No stamp this round");
-                }
+          setRewardToken(stampText);
+        } else {
+          setRewardToken("No stamp this round");
+        }
 
-                const sessionResult = await createGameSession(
-                  identityToken,
-                  blendshapesRef.current,
-                );
+        const sessionResult = await createGameSession(
+          identityToken,
+          blendshapesRef.current,
+        );
 
-                if (sessionResult) {
-                  setSessionId(sessionResult.sessionId);
-                  console.log("Game session created:", sessionResult.sessionId);
-                }
+        if (sessionResult) {
+          setSessionId(sessionResult.sessionId);
+        }
+      }
 
-                const newTarget = randomFace();
+      const newTarget = randomFace();
 
-                setTarget(newTarget);
-                targetRef.current = newTarget;
+      setTarget(newTarget);
+      targetRef.current = newTarget;
 
-                setScore(null);
-                setTargetSpinTrigger((v) => v + 1);
+      setScore(null);
 
-                startGame();
-                setIsStarting(false);
-              } catch (err) {
-                console.error("Transaction/create error", err);
-                setApiError("Could not create transaction.");
-                setIsStarting(false);
-              }
-            }}
-          />
+      setTargetSpinTrigger((v) => v + 1);
+
+      startGame();
+
+      setIsStarting(false);
+    } catch (err) {
+      console.error("Transaction/create error", err);
+      setApiError("Could not create transaction.");
+      setIsStarting(false);
+    }
+  }}
+/>
         )}
         <ControlsHint onOpenTutorial={() => setShowTutorial(true)} />
       </div>
