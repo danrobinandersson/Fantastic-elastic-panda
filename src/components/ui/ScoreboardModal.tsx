@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Button from "./Button";
 import Modal from "./Modal";
+import styles from "./ScoreboardModal.module.css";
 
 type Score = {
   centralbank_user_id: string;
@@ -43,10 +44,7 @@ export default function ScoreboardModal({ onClose }: ScoreboardModalProps) {
 
       <div style={{ marginBottom: "2rem" }}>
         {scores.map((score, index) => (
-          <div
-            key={score.centralbank_user_id}
-            style={{ margin: "0.5rem 0", color: "white" }}
-          >
+          <div key={score.centralbank_user_id} className={styles.scoreRow}>
             <strong>
               {index + 1}. {score.player_name}
             </strong>{" "}
