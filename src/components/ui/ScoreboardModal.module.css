@@ -1,0 +1,12 @@
+.scoreRow {
+  margin: 0.8rem 0;
+
+  color: white;
+
+  font-size: clamp(1.8rem, 4cqi, 2.8rem);
+  font-weight: bold;
+
+  text-shadow:
+    0px 1px 0 #000,
+    0px 2px 6px rgba(0, 0, 0, 0.9);
+}

@@ -34,9 +34,8 @@
 
   container-type: inline-size;
 
-  padding: clamp(1.25rem, 3cqi, 2.5rem)
-           clamp(1.5rem, 3cqi, 2.5rem)
-           clamp(1.25rem, 3cqi, 2rem);
+  padding: clamp(1.25rem, 3cqi, 2.5rem) clamp(1.5rem, 3cqi, 2.5rem)
+    clamp(1.25rem, 3cqi, 2rem);
 
   gap: 1rem;
 }
@@ -89,14 +88,10 @@
     0px 2px 6px rgba(0, 0, 0, 1);
 }
 
-
-
 .modal button {
   font-size: clamp(0.65rem, 0.9vw, 0.85rem);
-  padding: clamp(0.3rem, 0.5vw, 0.45rem)
-           clamp(0.8rem, 1.2vw, 1.15rem);
+  padding: clamp(0.3rem, 0.5vw, 0.45rem) clamp(0.8rem, 1.2vw, 1.15rem);
 }
-
 
 @media (max-width: 900px) and (min-width: 481px) {
   .modal {
@@ -119,9 +114,6 @@
   }
 }
 
-
-
-
 /* MOBILE */
 @media (max-width: 480px), (max-height: 400px) {
   .modal {
@@ -137,7 +129,7 @@
     object-fit: contain;
   }
 
- .modal h2 {
+  .modal h2 {
     position: absolute;
     top: clamp(0.7rem, 3.5svh, 1.5rem);
 
