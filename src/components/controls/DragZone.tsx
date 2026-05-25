@@ -80,6 +80,8 @@ export function DragZone({ zone, onDragStart, onDrag, onRelease, style }: DragZo
         position: 'absolute',
         width: '1%',
         height: '1%',
+        minWidth: '44px',
+        minHeight: '44px',
         borderRadius: '50%',
         cursor: 'grab',
         userSelect: 'none',
