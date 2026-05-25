@@ -84,7 +84,7 @@ export default function App() {
         name: "Guest Player",
         });
 
-        setIdentityToken(null);
+        setIdentityToken(null); 
 
 return;
         }
@@ -451,7 +451,6 @@ const handleGameComplete = useCallback(() => {
       {phase === "finished" && (
 <GameResultModal
   score={score}
-  token={rewardToken}
   stamp={stamp}
   isGuestMode={isGuestMode}
   config={config}
