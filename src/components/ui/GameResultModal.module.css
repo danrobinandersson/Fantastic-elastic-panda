@@ -1,0 +1,199 @@
+/* ── Content wrapper — flex:1 so it fills space between top padding and controls ── */
+.contentWrapper {
+  width: min(78%, 620px);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Title */
+.title {
+  pointer-events: none;
+  color: #f88c2f;
+  font-weight: bold;
+  margin: 0;
+  text-shadow:
+    0 .2rem 0 #a73906,
+    0 .3rem 0 #3d0b00,
+    0 .2rem 10px #000000de,
+    0 .4rem 20px #000000;
+  font-size: clamp(2.4rem, 10vw, 3.7rem);
+  line-height: 0.9;
+}
+
+/* Body */
+.body {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  color: white;
+  gap: 0.35rem;
+}
+
+/* Animated score — .score.score doubles specificity to beat .modal p { color: white } */
+.score.score {
+  font-size: clamp(2.2rem, 10cqi, 3.8rem);
+  font-weight: 700;
+  line-height: 1;
+  margin: 0;
+
+  color: #f88c2f;
+  text-shadow:
+    0 .2rem 0 #a73906,
+    0 .3rem 0 #3d0b00,
+    0 .2rem 10px #000000de,
+    0 .4rem 20px #000000;
+}
+
+/* Feedback + stamp + guest note — hidden until score animation completes */
+.feedback,
+.stampBlock,
+.note {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+
+.feedbackVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Feedback */
+.feedback {
+  font-size: clamp(0.85rem, 3cqi, 1.15rem);
+  margin: 0;
+
+  text-shadow:
+    0px 1px 0 #000,
+    0px 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+/* Note */
+.note {
+  font-size: clamp(0.75rem, 2.5cqi, 1rem);
+  margin: 0;
+  opacity: 0.85;
+
+  text-shadow:
+    0px 1px 0 #000,
+    0px 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+/* Stamp */
+.stampBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.stampImg {
+  border-radius: 50%;
+  width: clamp(60px, 12cqi, 100px);
+  height: clamp(60px, 12cqi, 100px);
+  object-fit: contain;
+}
+
+.stampLabel {
+  font-size: clamp(0.75rem, 2cqi, 0.95rem);
+  margin: 0;
+  opacity: 0.9;
+
+  text-shadow:
+    0px 1px 0 #000,
+    0px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* ── Controls — same pattern as TutorialModal ── */
+.controls {
+  width: 100%;
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: clamp(0.3rem, 1.5cqi, 0.6rem);
+  padding-bottom: clamp(0.1rem, 1cqi, 0.35rem);
+}
+
+/* ── Button row ── */
+.buttonRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.4rem, 2cqi, 0.85rem);
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.buttonRow > * {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+
+/* ── TABLET ── */
+@media (max-width: 900px) and (min-width: 481px) {
+  .contentWrapper {
+    width: 78%;
+  }
+
+  .title {
+    font-size: clamp(1.4rem, 4.5cqi, 2rem);
+  }
+
+  .score {
+    font-size: clamp(2.5rem, 12cqi, 3.8rem);
+  }
+
+  .feedback {
+    font-size: clamp(1rem, 3.5cqi, 1.3rem);
+  }
+
+  .buttonRow {
+    gap: clamp(0.5rem, 2.5cqi, 1rem);
+  }
+}
+
+
+/* ── MOBILE ── */
+@media (max-width: 480px), (max-height: 400px) {
+  .contentWrapper {
+    width: 78%;
+  }
+
+  .title {
+    font-size: clamp(1.35rem, 5.5cqi, 1.85rem);
+  }
+
+  .score {
+    font-size: clamp(2rem, 12cqi, 3.2rem);
+  }
+
+  .feedback {
+    font-size: clamp(0.85rem, 4cqi, 1.1rem);
+  }
+
+  .note {
+    font-size: clamp(0.7rem, 3.5cqi, 0.9rem);
+  }
+
+  .buttonRow {
+    gap: clamp(0.4rem, 2.5cqi, 0.75rem);
+  }
+}

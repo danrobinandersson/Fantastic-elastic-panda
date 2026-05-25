@@ -1,22 +1,50 @@
 .button {
-  padding: 10px 20px;
+  /* Size inherits from parent context (Modal sets font-size via clamp on .modal button) */
+  padding: 0.65em 1.4em;
   border: none;
   border-radius: 20px;
   cursor: pointer;
-  font-size: 16px;
+
+  /* Fluid fallback when not inside a modal */
+  font-size: clamp(0.7rem, 2vw, 1rem);
+
+  line-height: 1.2;
+  white-space: nowrap;
+
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.default {
+  background-color: var(--color-gold-light);
+  color: var(--color-black);
+  border: 2px solid var(--color-brown-main);
 }
 
 .primary {
   background-color: var(--color-gold-light);
   color: var(--color-black);
-  width: 8rem;
   border: 2px solid var(--color-brown-main);
 }
 
 .secondary {
   background-color: var(--color-brown-main);
   color: var(--color-gold-light);
-  border: 2px solid;
+  border: 2px solid var(--color-gold-light);
+}
+
+.ghost {
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+}
+
+.ghost:hover {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.button:hover {
+  opacity: 0.88;
 }
 
 .button:active {

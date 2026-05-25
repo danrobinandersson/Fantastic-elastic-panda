@@ -12,6 +12,7 @@
 
   z-index: 100;
 }
+
 .modal {
   position: relative;
   isolation: isolate;
@@ -40,16 +41,14 @@
 
   gap: 1rem;
 }
+
 .modal h2 {
   position: relative;
   top: auto;
-
   margin: 0;
-
   font-size: clamp(2rem, 5cqi, 3.5rem);
   line-height: 0.95;
   z-index: 2;
-
   pointer-events: none;
 }
 
@@ -57,19 +56,16 @@
 .bg {
   position: absolute;
   inset: 0;
-
   width: 100%;
   height: 100%;
-
   object-fit: contain;
   object-position: center;
-
   z-index: -1;
   border-radius: inherit;
-
   pointer-events: none;
   user-select: none;
 }
+
 /* CONTENT ABOVE IMAGE */
 .modal > *:not(.bg) {
   position: relative;
@@ -78,34 +74,40 @@
 
 .modal p {
   color: white;
-
   font-size: 4cqi;
-
   margin: 0;
-
   text-shadow:
     0px 1px 0 #000,
     0px 2px 0 #000,
     0px 2px 6px rgba(0, 0, 0, 1);
 }
 
-
-
 .modal button {
-  font-size: clamp(0.65rem, 0.9vw, 0.85rem);
-  padding: clamp(0.3rem, 0.5vw, 0.45rem)
-           clamp(0.8rem, 1.2vw, 1.15rem);
+  font-size: clamp(0.65rem, 2cqi, 0.85rem);
+  padding: clamp(0.3rem, 1cqi, 0.45rem)
+           clamp(0.8rem, 2.5cqi, 1.15rem);
 }
 
 
+/* ── TABLET (iPad) ── */
 @media (max-width: 900px) and (min-width: 481px) {
   .modal {
-    width: min(92vw, 620px);
-    height: min(90svh, 720px);
-    width: max(200px);
+    /* Wider so cqi-based text is larger */
+    width: min(68svh, 88vw, 480px);
+    height: auto;
     aspect-ratio: 9 / 16;
+    max-height: 92svh;
 
-    padding: 4rem 2rem 2rem;
+    /*
+      The vertical PNG has a painted frame.
+      Top frame edge starts ~9% down, bottom edge ends ~6% up.
+      Use svh-based padding so it's consistent regardless of modal width.
+    */
+    padding: clamp(3.5rem, 9svh, 5.5rem)    /* top  */
+             clamp(1.5rem, 4cqi, 2.25rem)   /* sides */
+             clamp(2rem, 6svh, 3.5rem);     /* bottom — keeps buttons inside frame */
+
+    gap: 0.75rem;
   }
 
   .bg {
@@ -114,22 +116,31 @@
   }
 
   .modal button {
-    font-size: clamp(0.75rem, 1.8vw, 1rem);
-    padding: 0.35rem 0.9rem;
+    font-size: clamp(0.85rem, 2.8cqi, 1.05rem);
+    padding: clamp(0.35rem, 1.2cqi, 0.55rem)
+             clamp(0.85rem, 3cqi, 1.2rem);
   }
 }
 
 
-
-
-/* MOBILE */
+/* ── MOBILE ── */
 @media (max-width: 480px), (max-height: 400px) {
   .modal {
-    /* width: min(calc(100vw - 24px), 420px); */
+    width: min(96vw, 420px);
     height: min(94svh, 680px);
-
     aspect-ratio: 9 / 16;
-    padding: 4rem 2rem 2rem;
+
+    /*
+      svh-based padding tracks the actual screen height so the frame
+      looks correct on short phones (iPhone 5/SE) and tall ones (14 Pro Max).
+      Top: taller padding because the frame title area sits higher.
+      Bottom: enough to keep controls above the frame's bottom border.
+    */
+    padding: clamp(2.6rem, 12svh, 5.5rem)    /* top */
+             clamp(1rem, 4cqi, 1.75rem)     /* sides */
+             clamp(1.8rem, 9.5svh, 4.2rem); /* bottom */
+
+    gap: 0.5rem;
   }
 
   .bg {
@@ -137,16 +148,16 @@
     object-fit: contain;
   }
 
- .modal h2 {
+  .modal h2 {
     position: absolute;
     top: clamp(0.7rem, 3.5svh, 1.5rem);
-
     font-size: clamp(2.4rem, 10vw, 3.7rem);
     line-height: 0.9;
   }
 
   .modal button {
-    font-size: clamp(0.7rem, 3.2vw, 0.95rem);
-    padding: 0.35rem 0.9rem;
+    font-size: clamp(0.7rem, 3.5cqi, 0.95rem);
+    padding: clamp(0.3rem, 1.2cqi, 0.45rem)
+             clamp(0.7rem, 3.5cqi, 1rem);
   }
 }
