@@ -10,7 +10,6 @@ type Stamp = {
 
 type GameResultModalProps = {
   score: number | null;
-  token: string | null;
   stamp?: Stamp | null;
   isGuestMode?: boolean;
   config: {
@@ -24,7 +23,6 @@ type GameResultModalProps = {
 
 export default function GameResultModal({
   score,
-  token,
   stamp,
   isGuestMode = false,
   config: _config,
