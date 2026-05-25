@@ -132,11 +132,6 @@ return;
   const [score, setScore] = useState<number | null>(null);
 
   /*
-    REWARD TOKEN
-  */
-  const [rewardToken, setRewardToken] = useState<string | null>(null);
-
-  /*
     RESET
   */
   const [resetTrigger, setResetTrigger] = useState(0);
@@ -254,20 +249,15 @@ const handleGameComplete = useCallback(() => {
 
         console.log("Edge Function response:", result);
 
-        if (result.error) {
-          console.error("Edge Function error:", result.error);
-        } else {
-          if (result.data?.payoutSuccess) {
-            setRewardToken(`💰 +€${payoutAmount.toFixed(2)}`);
-          }
-
-          if (result.data?.stamp) {
-            setStamp(result.data.stamp);
-          }
-        }
+if (result.error) {
+  console.error("Edge Function error:", result.error);
+} else {
+  if (result.data?.stamp) {
+    setStamp(result.data.stamp);
+  }
+}
       } catch (err) {
         console.error("Edge Function call error", err);
-        setRewardToken("Payment processing...");
       }
     }
 
@@ -306,28 +296,12 @@ const handleGameComplete = useCallback(() => {
       }),
     });
   }
-
-  /*
-    EXIT GAME
-
-  const handleExitGame = useCallback(() => {
-    setScore(null);
-    setRewardToken(null);
-    setTransactionId(0);
-    setSessionId(null);
-    setTarget({} as BlendshapeValues);
-
-    exitGame();
-  }, [exitGame]);
-    */
-
   /*
     RETURN TO TIVOLI
   */
   const handleReturnToTivoli = useCallback(() => {
   // Reset game state
   setScore(null);
-  setRewardToken(null);
   setTransactionId(0);
   setSessionId(null);
   setTarget({} as BlendshapeValues);
@@ -358,7 +332,6 @@ const handleGameComplete = useCallback(() => {
   const handlePlayAgain = useCallback(async () => {
   // Reset per-round state
   setScore(null);
-  setRewardToken(null);
   setTransactionId(0);
   setSessionId(null);
   setTarget({} as BlendshapeValues);
@@ -380,18 +353,7 @@ const handleGameComplete = useCallback(() => {
       });
 
       setTransactionId(transaction.transaction_id);
-
       setStamp(transaction.stamp ?? null);
-
-      if (transaction.stamp) {
-        const stampText = transaction.stamp.metal
-          ? `${transaction.stamp.metal} ${transaction.stamp.animal}`
-          : transaction.stamp.animal;
-
-        setRewardToken(stampText);
-      } else {
-        setRewardToken("No stamp this round");
-      }
 
       // Create Supabase session
       const sessionResult = await createGameSession(
@@ -574,7 +536,6 @@ const handleGameComplete = useCallback(() => {
     try {
       setIsStarting(true);
 
-      // Paid mode only
       if (!isGuestMode && identityToken) {
         const transaction = await api.createTransaction({
           identity_token: identityToken,
@@ -582,18 +543,7 @@ const handleGameComplete = useCallback(() => {
         });
 
         setTransactionId(transaction.transaction_id);
-
         setStamp(transaction.stamp ?? null);
-
-        if (transaction.stamp) {
-          const stampText = transaction.stamp.metal
-            ? `${transaction.stamp.metal} ${transaction.stamp.animal}`
-            : transaction.stamp.animal;
-
-          setRewardToken(stampText);
-        } else {
-          setRewardToken("No stamp this round");
-        }
 
         const sessionResult = await createGameSession(
           identityToken,
@@ -611,11 +561,9 @@ const handleGameComplete = useCallback(() => {
       targetRef.current = newTarget;
 
       setScore(null);
-
       setTargetSpinTrigger((v) => v + 1);
 
       startGame();
-
       setIsStarting(false);
     } catch (err) {
       console.error("Transaction/create error", err);
@@ -623,8 +571,8 @@ const handleGameComplete = useCallback(() => {
       setIsStarting(false);
     }
   }}
-/>
-        )}
+/>       
+ )}
         <ControlsHint onOpenTutorial={() => setShowTutorial(true)} />
       </div>
     </main>
