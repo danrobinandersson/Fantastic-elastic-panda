@@ -140,3 +140,28 @@
     0 2px 0 rgba(0, 0, 0, 0.45),
     0 0 18px rgba(255, 180, 90, 0.15);
 }
+
+
+@media only screen and (max-width: 200px) {
+  .hint {
+    /* Give it a real small size instead of scaling */
+    width: 100%;
+    padding: 3px 5px;
+    border-radius: 8px;
+    gap: 0;
+  }
+
+  .svgWrapper {
+    display: none;   /* icons don't fit — hide them */
+  }
+
+  .text {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+
+  .helpButton {
+    width: 16px;
+    height: 16px;
+  }
+}

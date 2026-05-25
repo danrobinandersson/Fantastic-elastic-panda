@@ -410,6 +410,7 @@ if (result.error) {
 
   return (
     <main>
+      
       {phase === "finished" && (
 <GameResultModal
   score={score}
@@ -468,6 +469,7 @@ if (result.error) {
 
           <div className="overlay-ui">
             <div className="UI-top-row">
+              
               {/* TIMER / HIGHSCORE BUTTON */}
 
               {phase === "playing" ? (

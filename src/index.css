@@ -202,3 +202,28 @@ body {
     
   }
 }
+
+@media only screen and (max-width: 200px) {
+  body {
+    aspect-ratio: 1/1;
+    height: 100vh;
+  }
+
+  .scene-wrapper {
+    width: 100vw;
+    border-radius: 0;
+  }
+
+  button {
+    font-size: 9px;
+    padding: 4px 7px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    border-radius: 3px;
+  }
+
+  .overlay-ui {
+    display: flex;
+    justify-content: center;
+  }
+}

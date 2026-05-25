@@ -1,3 +1,43 @@
+.closeButton {
+  position: fixed;
+  top: 2%;
+  right: 2%;
+
+  width: 2rem;
+  height: 2rem;
+
+  border: none;
+  border-radius: 0.5  rem;
+
+  background: #e53935;
+  color: white;
+
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+
+  box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.25);
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.closeButton:hover {
+  background: #c62828;
+  transform: scale(1.05);
+}
+
+.closeButton:active {
+  transform: scale(0.95);
+}
+
 .targetWindow {
   position: absolute;
 
@@ -96,7 +136,7 @@
 .windowText {
   position: absolute;
 
-  top: clamp(16px, 2.6vw, 16px);
+  top: clamp(6px, 1.0vw, 10px);
   left: 0;
   right: 0;
 
@@ -110,7 +150,45 @@
 
 
 
-  font-size: clamp(16px, 3vw, 32px);
+  font-size: clamp(1.6rem, 8vw, 2.5rem);
 
 
+}
+
+
+
+@media only screen and (max-width: 200px) {
+  .closeButton {
+    width: 1.1rem;
+    height: 1.1rem;
+    font-size: 0.8rem;
+    top: 2px;
+    right: 2px;
+    border-radius: 3px;
+  }
+
+  .targetWindow {
+    width: 50px;
+    top: 10px;
+    right: 10px;
+    border-radius: 4px;
+    padding: 1px;
+  }
+
+  .targetWindow h2 {
+    font-size: 0.6rem;
+
+        text-shadow: 
+      0 .02rem 0 #a73906, 
+      0 .03rem 0 #3d0b00, 
+      0 .02rem 10px #000000de, 
+      0 .04rem 20px #000000;
+    
+  }
+
+
+  .targetCanvasWrapper {
+  border-radius: 2%;
+    box-shadow:none;
+  }
 }

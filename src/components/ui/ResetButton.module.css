@@ -56,3 +56,14 @@
   85%  { transform: scale(0.98); }
   100% { transform: scale(1); }
 }
+
+
+@media only screen and (max-width: 200px) {
+
+
+  .resetButton{
+
+  scale: 0.4;
+  margin-top: -30px;
+  }
+}

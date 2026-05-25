@@ -125,3 +125,11 @@
   .timerContainerCompact { top: 12px; left: 12px; }
 }
 
+@media only screen and (max-width: 200px) {
+
+
+  .highscoreButton, .resetButton, .timerContainerCompact{
+
+  scale: 0.4;
+  }
+}

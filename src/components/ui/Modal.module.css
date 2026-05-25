@@ -161,3 +161,15 @@
              clamp(0.7rem, 3.5cqi, 1rem);
   }
 }
+
+
+@media only screen and (max-width: 200px) {
+
+  .modal {
+    height: 100%;
+    padding: 0;
+
+    }
+
+}
+

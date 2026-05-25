@@ -104,3 +104,11 @@
     transform: scale(1);
   }
 }
+
+
+@media only screen and (max-width: 200px) {
+.playButton{
+  gap: 0;
+  max-height: 5%;
+}
+}

@@ -197,3 +197,51 @@
     gap: clamp(0.4rem, 2.5cqi, 0.75rem);
   }
 }
+
+
+
+@media only screen and (max-width: 200px) {
+
+  
+.game-result-title {
+  position: absolute;
+  top: 10px;
+}
+
+.body {
+  display: flex;
+  justify-content: center;
+}
+
+  .hint {
+    scale: 0.2;
+  }
+
+
+  .contentWrapper {
+height: 100%;  }
+  
+
+  .title {
+scale: 0.5;  }
+
+  .score {
+scale: 0.5;  }
+
+  .feedback {
+scale: 0.5;  }
+
+  .note {
+scale: 0.5;  }
+
+  .buttonRow {
+scale: 0.5;  }
+
+.controls {
+  width: 70%;
+}
+
+.controls button {
+  font-size: 0.3rem;
+}
+}
