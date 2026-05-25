@@ -410,7 +410,12 @@ if (result.error) {
 
   return (
     <main>
-      
+      <button
+  className={styles.closeButton}
+  onClick={handleReturnToTivoli}
+>
+  ✕
+</button>
       {phase === "finished" && (
 <GameResultModal
   score={score}
