@@ -11,20 +11,20 @@ const BASE_URL = import.meta.env.VITE_CENTRALBANK_API_URL;
 const API_KEY = import.meta.env.VITE_TIVOLI_API_KEY;
 
 export const tivoliApi: TivoliApi = {
-  async getIdentity(token: string): Promise<IdentityTokenResponse> {
-    const res = await fetch(`${BASE_URL}/identity-tokens/${token}`);
+async getIdentity(token: string): Promise<IdentityTokenResponse> {
+  const res = await fetch(`${BASE_URL}/tivoli/identity-tokens/${token}`);
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Identity error:", {
-        status: res.status,
-        body: errorText,
-      });
-      throw new Error(`Failed to fetch identity: ${res.status}`);
-    }
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Identity error:", {
+      status: res.status,
+      body: errorText,
+    });
+    throw new Error(`Failed to fetch identity: ${res.status}`);
+  }
 
-    return res.json();
-  },
+  return res.json();
+},
 
   async createTransaction(
     request: CreateTransactionRequest,

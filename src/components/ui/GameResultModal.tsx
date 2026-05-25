@@ -82,16 +82,9 @@ export default function GameResultModal({
       <p>{getFeedbackMessage()}</p>
 
       {isGuestMode ? (
-        <p>Practice mode — no stamps or rewards earned.</p>
+        <p>Guest mode — no stamps or rewards earned.</p>
       ) : (
         <>
-          {token ? (
-            <p>
-              You received: <strong>{token}</strong>
-            </p>
-          ) : (
-            <p>Generating reward...</p>
-          )}
 
           {stamp?.image_url && (
             <div>
@@ -101,8 +94,9 @@ export default function GameResultModal({
                 src={stamp.image_url}
                 alt={`${stamp.animal ?? "Mystery"} stamp`}
                 style={{
-                  width: "120px",
-                  height: "120px",
+                  borderRadius: "50%",
+                  width: "100px",
+                  height: "100px",
                   objectFit: "contain",
                 }}
               />
