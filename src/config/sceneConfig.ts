@@ -31,8 +31,8 @@ camera: {
   light2: {
     color: "#ba6040",
     intensity: 209,
-    distance: 17.76,
-    decay: 0.8,
+    distance: 5.4,
+    decay: 1.0,
     position: [0.3, -4.2, -3.1],
   },
 
