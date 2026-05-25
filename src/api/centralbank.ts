@@ -30,7 +30,6 @@ async getIdentity(token: string): Promise<IdentityTokenResponse> {
 
   return res.json();
 },
-
   async createTransaction(
     request: CreateTransactionRequest,
   ): Promise<TransactionReceipt> {
@@ -60,7 +59,7 @@ async getIdentity(token: string): Promise<IdentityTokenResponse> {
     request: PayoutRequest,
   ): Promise<PayoutResponse> {
     const res = await fetch(
-      `${CENTRALBANK_URL}/transactions/${transactionId}/payout`
+      `${CENTRALBANK_URL}/transactions/${transactionId}/payout`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
