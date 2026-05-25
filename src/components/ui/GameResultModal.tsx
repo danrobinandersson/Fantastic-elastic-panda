@@ -89,7 +89,7 @@ export default function GameResultModal({
               <p>You received a stamp!</p>
 
               <img
-                src={stamp.image_url}
+                src={stamp.image_url?.replace("http://", "https://")}
                 alt={`${stamp.animal ?? "Mystery"} stamp`}
                 style={{
                   borderRadius: "50%",
