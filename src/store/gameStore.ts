@@ -68,7 +68,7 @@ export const useGameStore =
     config: {
       price: 1,
 
-      timerSeconds: 15,
+      timerSeconds: 20,
 
       doubleWinThreshold: 90,
 

@@ -11,7 +11,7 @@ const SLIDES = [
   {
     title: "Welcome",
     content:
-      "Match the target panda’s expression before time runs out. You have one chance per round — try to get as close as possible!",
+    <p>Match the target panda’s expression before time runs out. You have one chance per round — try to get as close as possible!</p>
   },
   {
       title: "Controls",
@@ -38,11 +38,22 @@ const SLIDES = [
   {
     title: "Scoring",
     content:
-      "The closer your match, the higher your score. Hitting high thresholds gives better rewards.",
+    <><p></p>
+      <p>The closer your match, the higher your score. Higher scores gives better rewards.</p>
+      <br></br>
+        <p>85 gives you your money back.</p>
+        <p>90 doubles your payout.</p>
+        <p>95 gives you 5x payout!</p>
+    </>
   },
   {
     title: "Good luck",
-    content: "Press Play when you're ready. Have fun and try to top the scoreboard!",
+    content: 
+    <>
+    <p>Press Play when you're ready. Have fun and try to top the scoreboard!</p>
+    <br></br>
+    <p>Best of luck! / Tim & Robin</p>
+  </>
   },
 ];
 

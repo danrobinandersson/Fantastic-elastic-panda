@@ -264,7 +264,7 @@ if (result.error) {
     finishGame(finalScore);
     setFreezeControls(false);
     finalizeTimeoutRef.current = null;
-  }, 600);
+  }, 100);
 }, [
   finishGame,
   transactionId,
@@ -472,7 +472,7 @@ if (result.error) {
 
               {phase === "playing" ? (
                 <Timer
-                  duration={config.timerSeconds ?? 15}
+                  duration={config.timerSeconds ?? 20}
                   isRunning={phase === "playing"}
                   onComplete={handleGameComplete}
                   compact
