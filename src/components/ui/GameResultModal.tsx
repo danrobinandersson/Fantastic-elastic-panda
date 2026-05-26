@@ -62,7 +62,7 @@ export default function GameResultModal({
 
     function step(t: number) {
       const p = Math.min(1, (t - start) / duration);
-      const v = Number((score * p).toFixed(2));
+      const v = Number(((score ?? 0) * p).toFixed(2));
 
       setDisplayed(v);
 
