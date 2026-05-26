@@ -214,11 +214,12 @@ return;
 
 
   /* Check if any modal is open (to disable controls) */
-  const isAnyModalOpen =
+const isAnyModalOpen =
   showTutorial ||
   showScoreboard ||
-  showLeaveModal;
-
+  showLeaveModal ||
+  phase === "finished";
+  
 const handleGameComplete = useCallback(() => {
   setFreezeControls(true);
 
