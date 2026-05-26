@@ -1,12 +1,135 @@
+/* ── Scrollable list wrapper — mirrors .slidesWrapper / .contentWrapper ── */
+.listWrapper {
+  width: min(82%, 560px);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  display: flex;
+  flex-direction: column;
+
+  /* Hide scrollbar visually but keep it functional */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.listWrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Individual row ── */
 .scoreRow {
-  margin: 0.8rem 0;
+  display: grid;
+  grid-template-columns: 2ch 1fr auto;
+  align-items: baseline;
+  gap: 0 0.75em;
 
   color: white;
+  font-size: clamp(0.8rem, 2.8cqi, 1.15rem);
+  line-height: 1.2;
 
-  font-size: clamp(1.8rem, 4cqi, 2.8rem);
-  font-weight: bold;
+  padding: 0.45em 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
   text-shadow:
     0px 1px 0 #000,
     0px 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.scoreRow:last-child {
+  border-bottom: none;
+}
+
+/* Rank number — right-aligned in its column */
+.rank {
+  text-align: right;
+  color: rgb(255, 255, 255);
+    text-shadow:
+    0px 1px 0 #000,
+    0px 2px 2px rgba(0, 0, 0, 1);
+
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* Top 3 gold/silver/bronze tints */
+.scoreRow:nth-child(1) .rank { color: #f88c2f; }
+.scoreRow:nth-child(2) .rank { color: #c0c0c0; }
+.scoreRow:nth-child(3) .rank { color: #cd7f32; }
+
+/* Name — takes remaining space, truncates if needed */
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  text-align: left;
+}
+
+/* Score — right-aligned, monospaced so digits line up */
+.score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #f88c2f;
+  text-align: right;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  text-shadow:
+    0 .1rem 0 #a73906,
+    0 .15rem 4px #000000de;
+}
+
+/* Empty state */
+.empty {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: clamp(0.8rem, 2.5cqi, 1rem);
+  margin: auto;
+  text-shadow:
+    0px 1px 0 #000,
+    0px 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+/* ── Controls — mirrors .controls ── */
+.controls {
+  width: 100%;
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: clamp(0.3rem, 1.5cqi, 0.55rem);
+}
+
+
+/* ── TABLET ── */
+@media (max-width: 900px) and (min-width: 481px) {
+  .listWrapper {
+    width: 82%;
+  }
+
+  .scoreRow {
+    font-size: clamp(0.9rem, 3.2cqi, 1.25rem);
+    padding: 0.5em 0;
+  }
+}
+
+
+/* ── MOBILE ── */
+@media (max-width: 480px), (max-height: 400px) {
+  .listWrapper {
+    width: 82%;
+  }
+
+  .scoreRow {
+    font-size: clamp(0.8rem, 3.8cqi, 1.1rem);
+    padding: 0.45em 0;
+  }
+
+  .modal {
+    padding: 1.5em 1em;
+    gap: 1.5em;
+  }
 }
