@@ -242,12 +242,16 @@ const handleGameComplete = useCallback(() => {
       identityToken &&
       finalScore >= config.moneyBackThreshold
     ) {
-      const payoutAmount =
-        finalScore >= 95
-          ? config.price * 5
-          : finalScore >= 90
-            ? config.price * 2
-            : config.price;
+const payoutAmount =
+  finalScore >= 95
+    ? 5
+    : finalScore >= 93
+      ? 4
+      : finalScore >= 90
+        ? 3
+        : finalScore >= 85
+          ? 1
+          : 0;
 
       try {
         const result = await validateAndPayout({

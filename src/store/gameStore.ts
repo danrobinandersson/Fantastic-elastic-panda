@@ -66,13 +66,13 @@ export const useGameStore =
       {} as BlendshapeValues,
 
     config: {
-      price: 1,
+      price: 2,
 
       timerSeconds: 20,
 
-      doubleWinThreshold: 90,
+      doubleWinThreshold: 90, // 90+ = 3+ coin payout
 
-      moneyBackThreshold: 85,
+      moneyBackThreshold: 87,
     },
 
     setGuestMode: (value) =>
