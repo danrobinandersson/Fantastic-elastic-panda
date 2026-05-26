@@ -41,6 +41,29 @@
   gap: 0.35rem;
 }
 
+
+.solutionPreview {
+  width: clamp(140px, 32cqi, 300px);
+  height: clamp(140px, 32cqi, 300px);
+
+  border-radius: 1rem;
+  overflow: hidden;
+  position: relative;
+  background: transparent;
+  margin: 0.25rem 0;
+}
+
+.controls {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+
+.controlsVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Animated score — .score.score doubles specificity to beat .modal p { color: white } */
 .score.score {
   font-size: clamp(2.2rem, 10cqi, 3.8rem);
@@ -153,8 +176,8 @@
     width: 78%;
   }
 
-  .title {
-    font-size: clamp(1.4rem, 4.5cqi, 2rem);
+    .contentWrapper h2 {
+    font-size: clamp(3rem, 4.5cqi, 4rem);
   }
 
   .score {
@@ -167,6 +190,19 @@
 
   .buttonRow {
     gap: clamp(0.5rem, 2.5cqi, 1rem);
+  }
+
+  .game {
+    font-size: clamp(5rem, 50cqi, 6rem);
+  }
+
+
+      .solutionPreview {
+    width: min(72vw, 320px);
+    height: min(72vw, 320px);
+
+    margin-top: -0.5rem;
+    margin-bottom: -0.5rem;
   }
 }
 
@@ -196,6 +232,15 @@
   .buttonRow {
     gap: clamp(0.4rem, 2.5cqi, 0.75rem);
   }
+
+    .solutionPreview {
+    width: min(72vw, 320px);
+    height: min(72vw, 320px);
+
+    margin-top: -0.5rem;
+    margin-bottom: -0.5rem;
+  }
+
 }
 
 

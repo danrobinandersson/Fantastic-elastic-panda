@@ -475,10 +475,11 @@ if (result.error) {
   stamp={stamp}
   isGuestMode={isGuestMode}
   config={config}
+  playerBlendshapes={blendshapes}
+  targetBlendshapes={target}
   onPlayAgain={handlePlayAgain}
   onReturnToTivoli={handleReturnToTivoli}
   onShowHighScores={() => setShowScoreboard(true)}
-  
 />
       )}
 

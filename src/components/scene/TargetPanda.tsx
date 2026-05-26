@@ -56,7 +56,7 @@ export const TargetPanda = React.forwardRef<THREE.Group, TargetPandaProps>(
       elapsed: 0,
       coveredCalled: false,
       rotationBlendshape: 0,
-      revealProgress: 0,
+      revealProgress: 1,
 
     })
 
@@ -112,7 +112,7 @@ export const TargetPanda = React.forwardRef<THREE.Group, TargetPandaProps>(
       spinRef.current.elapsed = 0
       spinRef.current.coveredCalled = false
       spinRef.current.rotationBlendshape = 0
-      spinRef.current.revealProgress = 0
+      spinRef.current.revealProgress = spinTrigger ? 0 : 1
 
 
       if (groupRef.current) {

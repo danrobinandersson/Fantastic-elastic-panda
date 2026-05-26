@@ -71,8 +71,8 @@ export const useGameStore =
       timerSeconds: 20,
 
       doubleWinThreshold: 90, // 90+ = 3+ coin payout
+      moneyBackThreshold: 85, // 85+ = 1 coin back
 
-      moneyBackThreshold: 87,
     },
 
     setGuestMode: (value) =>
