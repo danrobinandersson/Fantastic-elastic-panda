@@ -172,10 +172,6 @@ useEffect(() => {
                   className={styles.stampImg}
                 />
 
-                <p className={styles.stampLabel}>
-                  {stamp.animal && <span>{stamp.animal}</span>}
-                  {stamp.metal && <span> · {stamp.metal}</span>}
-                </p>
               </div>
             )
           )}
