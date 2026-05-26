@@ -1,42 +1,80 @@
 .closeButton {
   position: fixed;
-  top: 2%;
-  right: 2%;
-
-  width: 2rem;
-  height: 2rem;
-
-  border: none;
-  border-radius: 0.5  rem;
-
-  background: #e53935;
-  color: white;
-
-  font-size: 1.5rem;
-  font-weight: bold;
+  top: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: #c1121f;
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
   cursor: pointer;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   z-index: 9999;
-
-  box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.25);
-
-  transition:
-    transform 0.15s ease,
-    background 0.15s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .closeButton:hover {
-  background: #c62828;
-  transform: scale(1.05);
+  background: #a30f1a;
+}
+
+.closeButton:focus-visible {
+  outline: 4px solid #ffffff;
+  outline-offset: 3px;
+  border-color: #000000;
 }
 
 .closeButton:active {
   transform: scale(0.95);
 }
+
+.leaveModalContent {
+  width: min(78%, 620px);
+  flex: 1;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: clamp(2rem, 5cqi, 3rem);
+  color: white;
+}
+
+.leaveModalContent h2 {
+  color: #f88c2f;
+  font-weight: bold;
+  margin: 0;
+  text-align: center;
+  text-shadow:
+    0 .2rem 0 #a73906,
+    0 .3rem 0 #3d0b00,
+    0 .2rem 10px #000000de,
+    0 .4rem 20px #000000;
+}
+
+.leaveModalActions {
+  display: flex;
+  gap: clamp(1rem, 4cqi, 1.5rem);
+  justify-content: center;
+  align-items: center;
+}
+
+.leaveModalActions button:focus-visible {
+  outline: 4px solid #ffffff;
+  outline-offset: 4px;
+}
+
+
+
+
+
 
 .targetWindow {
   position: absolute;
@@ -175,9 +213,10 @@
     padding: 1px;
   }
 
-  .targetWindow h2 {
-    font-size: 0.6rem;
-
+  .leaveModalContent h2 {
+    width: 50%;
+    font-size: 0.8rem;
+    
         text-shadow: 
       0 .02rem 0 #a73906, 
       0 .03rem 0 #3d0b00, 
@@ -186,9 +225,26 @@
     
   }
 
-
   .targetCanvasWrapper {
   border-radius: 2%;
     box-shadow:none;
   }
+
+  .leave-game-title {
+    font-size: 0.5rem;
+  }
+
+  .leaveModalContent h2 {
+  color: #f88c2f;
+  font-weight: bold;
+  margin: 0;
+  text-align: center;
+  text-shadow:
+    0 .02rem 0 #a73906,
+    0 .03rem 0 #3d0b00,
+    0 .02rem 10px #000000de,
+    0 .04rem 20px #000000;
 }
+}
+
+

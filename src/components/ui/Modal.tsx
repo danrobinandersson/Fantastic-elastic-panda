@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import styles from "./Modal.module.css";
-
+import { FocusTrap } from "focus-trap-react";
 type ModalProps = {
   onExit: () => void;
   labelId?: string;
@@ -18,6 +18,13 @@ export default function Modal({ onExit, labelId, children }: ModalProps) {
 
 return (
   <div className={styles.backdrop} onClick={onExit}>
+    <FocusTrap
+  focusTrapOptions={{
+    initialFocus: false,
+    escapeDeactivates: false,
+    allowOutsideClick: true,
+  }}
+>
     <div
       className={styles.modal}
       role="dialog"
@@ -33,6 +40,7 @@ return (
 
       {children}
     </div>
+    </FocusTrap>
   </div>
 );
 }

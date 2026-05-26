@@ -12,7 +12,7 @@ import HighscoreButton from "./components/ui/HighscoreButton";
 import GameResultModal from "./components/ui/GameResultModal";
 import ScoreboardModal from "./components/ui/ScoreboardModal";
 import TutorialModal from "./components/ui/TutorialModal";
-
+import Modal from "./components/ui/Modal";
 import { useGameStore } from "./store/gameStore";
 
 import styles from "./App.module.css";
@@ -138,6 +138,9 @@ return;
 
   /* Tutorial modal */
   const [showTutorial, setShowTutorial] = useState(false);
+
+  /* Leave game modal */
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
 
   /*
     SPRING SETTINGS
@@ -410,12 +413,46 @@ if (result.error) {
 
   return (
     <main>
-      <button
+
+      {showLeaveModal && (
+  <Modal
+    onExit={() => setShowLeaveModal(false)}
+    labelId="leave-game-title"
+  >
+    <div className={styles.leaveModalContent}>
+      <h2 id="leave-game-title">
+        Leave the game and return to Loopland?
+      </h2>
+
+      <div className={styles.leaveModalActions}>
+        <button
+          type="button"
+          onClick={handleReturnToTivoli}
+        >
+          Yes
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setShowLeaveModal(false)}
+          autoFocus
+        >
+          No
+        </button>
+      </div>
+    </div>
+  </Modal>
+)}
+<button
+  type="button"
   className={styles.closeButton}
-  onClick={handleReturnToTivoli}
+  aria-label="Open return to Loopland confirmation"
+  title="Return to Loopland"
+  onClick={() => setShowLeaveModal(true)}
 >
-  ✕
+  <span aria-hidden="true">✕</span>
 </button>
+
       {phase === "finished" && (
 <GameResultModal
   score={score}
