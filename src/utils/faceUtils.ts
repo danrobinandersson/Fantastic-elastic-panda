@@ -101,7 +101,7 @@ export function scoreMatch(
     const playerVal =
       (player[key as keyof BlendshapeValues] ?? 0) / max
 
-    sumError += Math.abs(targetVal - playerVal) * 0.88 // Apply a slight multiplier to make the game a bit more forgiving
+    sumError += Math.abs(targetVal - playerVal) * 0.86 // Apply a slight multiplier to make the game a bit more forgiving
   }
 
   const avgError = sumError / CONTROLLABLE_MORPH_KEYS.length
