@@ -12,7 +12,7 @@ interface DragZoneProps {
 const SLOPPY_SOUND_SRC = "/sounds/sloppy.mp3";
 const VELOCITY_THRESHOLD = 0.8; // Adjust this value to make it more or less sensitive to movement speed
 
-const SUSTAIN_REQUIRED_MS = 120;
+const SUSTAIN_REQUIRED_MS = 90;
 const FADE_IN_MS = 10;
 const STOP_DELAY_MS = 10;
 const FADE_OUT_MS = 200;
