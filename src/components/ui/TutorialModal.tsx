@@ -41,9 +41,11 @@ const SLIDES = [
     <><p></p>
       <p>The closer your match, the higher your score. Higher scores gives better rewards.</p>
       <br></br>
-        <p>85 gives you your money back.</p>
-        <p>90 doubles your payout.</p>
-        <p>95 gives you 5x payout!</p>
+        <p>85 = 1 coin</p>
+        <p>90 = 3 coins</p>
+        <p>93 = 4 coins</p>
+        <p>95 = 5 coins</p>
+
     </>
   },
   {
