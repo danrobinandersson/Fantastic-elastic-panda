@@ -35,9 +35,8 @@
 
   container-type: inline-size;
 
-  padding: clamp(1.25rem, 3cqi, 2.5rem)
-           clamp(1.5rem, 3cqi, 2.5rem)
-           clamp(1.25rem, 3cqi, 2rem);
+  padding: clamp(1.25rem, 3cqi, 2.5rem) clamp(1.5rem, 3cqi, 2.5rem)
+    clamp(1.25rem, 3cqi, 2rem);
 
   gap: 1rem;
 }
@@ -148,6 +147,7 @@
     object-fit: contain;
   }
 
+  .modal h2 {
   .modal h2 {
     position: absolute;
     top: clamp(0.7rem, 3.5svh, 1.5rem);
