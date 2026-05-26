@@ -142,6 +142,7 @@ return;
   /* Leave game modal */
   const [showLeaveModal, setShowLeaveModal] = useState(false);
 
+
   /*
     SPRING SETTINGS
   */
@@ -210,6 +211,13 @@ return;
   const [showScoreboard, setShowScoreboard] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [freezeControls, setFreezeControls] = useState(false);
+
+
+  /* Check if any modal is open (to disable controls) */
+  const isAnyModalOpen =
+  showTutorial ||
+  showScoreboard ||
+  showLeaveModal;
 
 const handleGameComplete = useCallback(() => {
   setFreezeControls(true);
@@ -443,6 +451,8 @@ if (result.error) {
     </div>
   </Modal>
 )}
+{!isAnyModalOpen && (
+
 <button
   type="button"
   className={styles.closeButton}
@@ -452,6 +462,7 @@ if (result.error) {
 >
   <span aria-hidden="true">✕</span>
 </button>
+)}
 
       {phase === "finished" && (
 <GameResultModal
