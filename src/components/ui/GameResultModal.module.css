@@ -95,7 +95,7 @@
 
 /* Feedback */
 .feedback {
-  font-size: clamp(.8rem, 2.2cqi, 1.6rem); 
+  font-size: clamp(1rem, 2.2cqi, 1.6rem); 
    margin: 0;
 
   text-shadow:
@@ -134,6 +134,8 @@
   width: clamp(38px, 6cqi, 70px);
   height: clamp(38px, 6cqi, 70px);
   object-fit: contain;
+  background: white;
+  margin-top: 1rem;
 }
 
 /* ── Controls — same pattern as TutorialModal ── */
