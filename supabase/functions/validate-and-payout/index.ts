@@ -206,7 +206,7 @@ function scoreMatch(
  const targetVal = (targetShapes[key] ?? 0) / max;
  const playerVal = (playerShapes[key] ?? 0) / max;
 
- sumError += Math.abs(targetVal - playerVal) * 0.86; //Adjust difficulty. Lower value = easier. 
+ sumError += Math.abs(targetVal - playerVal) * 0.78; //Adjust difficulty. Lower value = easier. 
 //1.0   Normal
 //0.96	tiny easier
 //0.92	slightly easier
