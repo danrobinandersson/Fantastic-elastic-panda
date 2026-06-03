@@ -10,12 +10,12 @@ interface DragZoneProps {
 }
 
 const SLOPPY_SOUND_SRC = "/sounds/sloppy.mp3";
-const VELOCITY_THRESHOLD = 0.4; // Adjust this value to make it more or less sensitive to movement speed
+const VELOCITY_THRESHOLD = 1.5; // Adjust this value to make it more or less sensitive to movement speed
 
-const SUSTAIN_REQUIRED_MS = 30;
+const SUSTAIN_REQUIRED_MS = 60;
 const FADE_IN_MS = 10;
 const STOP_DELAY_MS = 10;
-const FADE_OUT_MS = 200;
+const FADE_OUT_MS = 0;
 const MAX_VOLUME = 0.55;
 
 export function DragZone({ zone, onDragStart, onDrag, onRelease, style }: DragZoneProps) {
@@ -28,7 +28,7 @@ const fadeOutIntervalRef = useRef<number | null>(null);
 
 
 function shouldUseSloppySound(zoneId: string) {
-  return zoneId === 'l_cheek' || zoneId === 'r_cheek' || zoneId === 'mouth'
+  return zoneId === 'l_cheek' || zoneId === 'r_cheek'
 }
 
   const lastMoveRef = useRef<{
