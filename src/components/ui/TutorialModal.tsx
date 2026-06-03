@@ -10,7 +10,7 @@ type TutorialModalProps = {
 const SLIDES = [
 {
   title: "Welcome",
-  content: <p>Match the target panda before time runs out!</p>
+  content: <p>Match the target before time runs out!</p>
 },
   {
       title: "Controls",
