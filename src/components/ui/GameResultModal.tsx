@@ -11,7 +11,7 @@ type GameResultModalProps = {
   score: number | null;
   playerBlendshapes: BlendshapeValues;
   targetBlendshapes: BlendshapeValues;
-  onPlayAgain: () => void;
+  onClose: () => void;
   onShowHighScores: () => void;
   onSaveScore: (playerName: string) => Promise<void>;
   qualifiesForLeaderboard: boolean | null;
@@ -21,7 +21,7 @@ export default function GameResultModal({
   score,
   playerBlendshapes,
   targetBlendshapes,
-  onPlayAgain,
+  onClose,
   onShowHighScores,
   onSaveScore,
   qualifiesForLeaderboard,
@@ -207,7 +207,7 @@ export default function GameResultModal({
           <Button onClick={onShowHighScores} variant="secondary">
             High Scores
           </Button>
-          <Button onClick={onPlayAgain}>Play Again</Button>
+          <Button onClick={onClose}>New Game</Button>
         </div>
       </div>
     </Modal>

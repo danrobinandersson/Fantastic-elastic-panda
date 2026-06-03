@@ -3,7 +3,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { PlayerPanda } from "./components/scene/PlayerPanda";
 import { TargetPanda } from "./components/scene/TargetPanda";
 import { FaceControls } from "./components/controls/FaceControls";
-import { randomFace, scoreMatch } from "./utils/faceUtils";
+import { randomFace } from "./utils/faceUtils";
 import type { BlendshapeValues } from "./types/blendshape";
 import { SceneLayout } from "./components/scene/SceneLayout";
 import PlayButton from "./components/ui/PlayButton";
@@ -177,6 +177,7 @@ const checkLeaderboardQualification = useCallback(async () => {
   );
 
   const data = await response.json();
+
   console.log("Leaderboard qualification:", data);
 
   if (!response.ok) {
@@ -184,8 +185,9 @@ const checkLeaderboardQualification = useCallback(async () => {
   }
 
   setQualifiesForLeaderboard(Boolean(data.qualifies));
-}, []);
 
+  return data;
+}, []);
 
 
 const handleGameComplete = useCallback(() => {
@@ -197,40 +199,44 @@ const handleGameComplete = useCallback(() => {
   }
 
   finalizeTimeoutRef.current = window.setTimeout(async () => {
-    const finalScore = scoreMatch(targetRef.current, blendshapesRef.current);
-
-    setScore(finalScore);
-    console.log("Final score:", finalScore);
 
     try {
-      await checkLeaderboardQualification();
+      const data = await checkLeaderboardQualification();
+
+      const serverScore =
+        typeof data.validatedScore === "number"
+          ? data.validatedScore
+          : 0;
+
+      setScore(serverScore);
+      finishGame(serverScore);
     } catch (err) {
       console.error("Could not check leaderboard qualification:", err);
       setQualifiesForLeaderboard(false);
+      setScore(0);
+      finishGame(0);
     }
 
-    finishGame(finalScore);
     setFreezeControls(false);
     finalizeTimeoutRef.current = null;
   }, 100);
 }, [finishGame, checkLeaderboardQualification]);
 
+
   
-  const handlePlayAgain = useCallback(async () => {
-    setTarget({} as BlendshapeValues);
+const handlePlayAgain = useCallback(() => {
+  setScore(null);
+  setQualifiesForLeaderboard(null);
 
-    try {
-      setIsStarting(true);
+  setTarget({} as BlendshapeValues);
+  targetRef.current = {} as BlendshapeValues;
 
-      handleReset();
-      startNewRound();
+  handleReset();
 
-      setIsStarting(false);
-    } catch (err) {
-      console.error("Play again error:", err);
-      setIsStarting(false);
-    }
-  }, [startNewRound]);
+  useGameStore.setState({
+    phase: "idle",
+  });
+}, []);
 
   useEffect(() => {
     try {
@@ -255,7 +261,7 @@ const handleGameComplete = useCallback(() => {
   score={score}
   playerBlendshapes={blendshapes}
   targetBlendshapes={target}
-  onPlayAgain={handlePlayAgain}
+  onClose={handlePlayAgain}
   onShowHighScores={() => setShowScoreboard(true)}
   onSaveScore={handleSaveScore}
   qualifiesForLeaderboard={qualifiesForLeaderboard}
