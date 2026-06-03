@@ -8,11 +8,10 @@ type TutorialModalProps = {
 };
 
 const SLIDES = [
-  {
-    title: "Welcome",
-    content:
-    <p>Match the target panda’s expression before time runs out. You have one chance per round — try to get as close as possible!</p>
-  },
+{
+  title: "Welcome",
+  content: <p>Match the target panda before time runs out!</p>
+},
   {
       title: "Controls",
     content: (
@@ -34,19 +33,6 @@ const SLIDES = [
         </video>
       </>
     ),
-  },
-  {
-    title: "Scoring",
-    content:
-    <><p></p>
-      <p>The closer your match, the higher your score. Higher scores gives better rewards.</p>
-      <br></br>
-        <p>85 = 1 coin</p>
-        <p>90 = 3 coins</p>
-        <p>93 = 4 coins</p>
-        <p>95 = 5 coins</p>
-
-    </>
   },
   {
     title: "Good luck",
