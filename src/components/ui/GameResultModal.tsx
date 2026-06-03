@@ -14,6 +14,7 @@ type GameResultModalProps = {
   onPlayAgain: () => void;
   onShowHighScores: () => void;
   onSaveScore: (playerName: string) => Promise<void>;
+  qualifiesForLeaderboard: boolean | null;
 };
 
 export default function GameResultModal({
@@ -23,6 +24,7 @@ export default function GameResultModal({
   onPlayAgain,
   onShowHighScores,
   onSaveScore,
+  qualifiesForLeaderboard,
 }: GameResultModalProps) {
   const [displayed, setDisplayed] = useState<number | null>(null);
   const [miniValues, setMiniValues] = useState<BlendshapeValues>(playerBlendshapes);
@@ -147,45 +149,51 @@ export default function GameResultModal({
           </p>
 
           {/* ── Leaderboard submission ── */}
-          <div
-            className={`${styles.submitBlock} ${
-              showResultInfo ? styles.feedbackVisible : ""
-            }`}
-          >
-            {submitState === "saved" ? (
-              <p className={styles.savedConfirm}>Score posted ✓</p>
-            ) : (
-              <>
-                <p className={styles.submitLabel}>Post to leaderboard?</p>
-                <div className={styles.submitRow}>
-                  <input
-                    className={styles.nameInput}
-                    type="text"
-                    placeholder="Your name"
-                    maxLength={32}
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleSubmit();
-                    }}
-                    disabled={submitState === "saving"}
-                    aria-label="Enter your name for the leaderboard"
-                  />
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={!playerName.trim() || submitState === "saving"}
-                  >
-                    {submitState === "saving" ? "Posting…" : "Post"}
-                  </Button>
-                </div>
-                {submitState === "error" && (
-                  <p className={styles.submitError}>
-                    Could not post score. Try again?
-                  </p>
-                )}
-              </>
-            )}
-          </div>
+<div
+  className={`${styles.submitBlock} ${
+    showResultInfo ? styles.feedbackVisible : ""
+  }`}
+>
+  {qualifiesForLeaderboard === null ? (
+    <p className={styles.submitLabel}>Checking leaderboard…</p>
+  ) : !qualifiesForLeaderboard ? (
+    <p className={styles.submitLabel}>
+      Try again to get on the leaderboard!
+    </p>
+  ) : submitState === "saved" ? (
+    <p className={styles.savedConfirm}>Score posted ✓</p>
+  ) : (
+    <>
+      <p className={styles.submitLabel}>You made the leaderboard!</p>
+      <div className={styles.submitRow}>
+        <input
+          className={styles.nameInput}
+          type="text"
+          placeholder="Your name"
+          maxLength={32}
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSubmit();
+          }}
+          disabled={submitState === "saving"}
+          aria-label="Enter your name for the leaderboard"
+        />
+        <Button
+          onClick={handleSubmit}
+          disabled={!playerName.trim() || submitState === "saving"}
+        >
+          {submitState === "saving" ? "Posting…" : "Post"}
+        </Button>
+      </div>
+      {submitState === "error" && (
+        <p className={styles.submitError}>
+          Could not post score. Try again?
+        </p>
+      )}
+    </>
+  )}
+</div>
         </div>
       </div>
 

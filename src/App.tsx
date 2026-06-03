@@ -42,6 +42,9 @@ export default function App() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [showScoreboard, setShowScoreboard] = useState(false);
 
+  const [qualifiesForLeaderboard, setQualifiesForLeaderboard] =
+  useState<boolean | null>(null);
+
   const [springConfig, setSpringConfig] = useState({
     stiffness: 400,
     damping: 32,
@@ -95,6 +98,7 @@ export default function App() {
 
   const startNewRound = useCallback(() => {
     sessionIdRef.current = crypto.randomUUID();
+    setQualifiesForLeaderboard(null);
 
     const newTarget = randomFace();
     setTarget(newTarget);
@@ -148,26 +152,70 @@ export default function App() {
     [score],
   );
 
-  const handleGameComplete = useCallback(() => {
-    setFreezeControls(true);
 
-    if (finalizeTimeoutRef.current) {
-      window.clearTimeout(finalizeTimeoutRef.current);
-      finalizeTimeoutRef.current = null;
+
+
+const checkLeaderboardQualification = useCallback(async () => {
+  const identityToken = getOrCreateIdentityToken();
+
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-and-payout`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({
+        sessionId: sessionIdRef.current,
+        identityToken,
+        playerBlendshapes: blendshapesRef.current,
+        targetBlendshapes: targetRef.current,
+      }),
+    },
+  );
+
+  const data = await response.json();
+  console.log("Leaderboard qualification:", data);
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to check leaderboard");
+  }
+
+  setQualifiesForLeaderboard(Boolean(data.qualifies));
+}, []);
+
+
+
+const handleGameComplete = useCallback(() => {
+  setFreezeControls(true);
+
+  if (finalizeTimeoutRef.current) {
+    window.clearTimeout(finalizeTimeoutRef.current);
+    finalizeTimeoutRef.current = null;
+  }
+
+  finalizeTimeoutRef.current = window.setTimeout(async () => {
+    const finalScore = scoreMatch(targetRef.current, blendshapesRef.current);
+
+    setScore(finalScore);
+    console.log("Final score:", finalScore);
+
+    try {
+      await checkLeaderboardQualification();
+    } catch (err) {
+      console.error("Could not check leaderboard qualification:", err);
+      setQualifiesForLeaderboard(false);
     }
 
-    finalizeTimeoutRef.current = window.setTimeout(() => {
-      const finalScore = scoreMatch(targetRef.current, blendshapesRef.current);
+    finishGame(finalScore);
+    setFreezeControls(false);
+    finalizeTimeoutRef.current = null;
+  }, 100);
+}, [finishGame, checkLeaderboardQualification]);
 
-      setScore(finalScore);
-      console.log("Final score:", finalScore);
-
-      finishGame(finalScore);
-      setFreezeControls(false);
-      finalizeTimeoutRef.current = null;
-    }, 100);
-  }, [finishGame]);
-
+  
   const handlePlayAgain = useCallback(async () => {
     setTarget({} as BlendshapeValues);
 
@@ -203,14 +251,15 @@ export default function App() {
   return (
     <main>
       {phase === "finished" && (
-        <GameResultModal
-          score={score}
-          playerBlendshapes={blendshapes}
-          targetBlendshapes={target}
-          onPlayAgain={handlePlayAgain}
-          onShowHighScores={() => setShowScoreboard(true)}
-          onSaveScore={handleSaveScore}
-        />
+<GameResultModal
+  score={score}
+  playerBlendshapes={blendshapes}
+  targetBlendshapes={target}
+  onPlayAgain={handlePlayAgain}
+  onShowHighScores={() => setShowScoreboard(true)}
+  onSaveScore={handleSaveScore}
+  qualifiesForLeaderboard={qualifiesForLeaderboard}
+/>
       )}
 
       {showScoreboard && (
