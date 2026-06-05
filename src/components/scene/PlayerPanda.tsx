@@ -150,7 +150,7 @@ if (!mesh?.morphTargetDictionary) return
 <mesh
   ref={eyeRRef}
   geometry={nodes.EyeR.geometry}
-  position={[31, 76.02, 6.72]}
+  position={[29, 76.02, 6.72]}
   material={materials.Panda}
   scale={[1, 1, 1]}
 />
@@ -158,7 +158,7 @@ if (!mesh?.morphTargetDictionary) return
 <mesh
   ref={eyeLRef}
   geometry={nodes.EyeL.geometry}
-  position={[-31, 76.02, 6.72]}
+  position={[-29, 76.02, 6.72]}
   material={materials.Panda}
   scale={[1, 1, 1]}
 />
