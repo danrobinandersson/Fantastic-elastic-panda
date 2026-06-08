@@ -8,17 +8,14 @@ type TutorialModalProps = {
 };
 
 const SLIDES = [
-{
-  title: "Welcome",
-  content: <p>Match the target before time runs out!</p>
-},
+
   {
       title: "Controls",
     content: (
       <>
         <p>
           Drag the panda’s face using your finger or mouse to match the target
-          expression.
+          expression before time runs out.
         </p>
 
         <video
