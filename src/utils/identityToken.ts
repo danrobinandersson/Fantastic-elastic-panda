@@ -1,4 +1,4 @@
-const TOKEN_STORAGE_KEY = "tivoli-identity-token";
+const TOKEN_STORAGE_KEY = "identity-token";
 
 export function getIdentityTokenFromUrl(): string | null {
   const params = new URLSearchParams(window.location.search);

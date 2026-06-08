@@ -1,270 +1,142 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import pg from "pg";
+import { createClient } from "@supabase/supabase-js";
+import { randomUUID } from "crypto";
 
 dotenv.config();
-
-const { Pool } = pg;
-
-const CENTRALBANK_BASE_URL =
-  process.env.CENTRALBANK_BASE_URL || "https://api.loopland.se";
-const AMUSEMENT_API_KEY = process.env.AMUSEMENT_API_KEY;
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl:
-    process.env.DATABASE_SSL === "true"
-      ? { rejectUnauthorized: false }
-      : undefined,
-});
+const SUPABASE_URL =
+  process.env.VITE_SUPABASE_URL || "https://kfjvevfrzqnxlerwrtaa.supabase.co";
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || "";
 
-app.get("/", (req: express.Request, res: express.Response) =>
+if (!SUPABASE_ANON_KEY) {
+  console.warn(
+    "Warning: VITE_SUPABASE_ANON_KEY not set. Scores endpoints may fail.",
+  );
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+app.get("/", (_req: express.Request, res: express.Response) =>
   res.send("Scoreboard API is running"),
-);
-
-// Tivoli proxy: create transaction
-app.post(
-  "/tivoli/create-transaction",
-  async (req: express.Request, res: express.Response) => {
-    const body = req.body;
-    if (!body || typeof body !== "object")
-      return res.status(400).json({ message: "Request body required" });
-
-    try {
-      const resp = await fetch(`${CENTRALBANK_BASE_URL}/transactions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...body, api_key: AMUSEMENT_API_KEY }),
-      });
-
-      const text = await resp.text();
-      const isJson = resp.headers
-        .get("content-type")
-        ?.includes("application/json");
-      if (!resp.ok)
-        return res
-          .status(resp.status)
-          .contentType(resp.headers.get("content-type") ?? "text/plain")
-          .send(text);
-      return isJson ? res.json(JSON.parse(text)) : res.send(text);
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ message: "Proxy error" });
-    }
-  },
-);
-
-// Tivoli proxy: payout by transaction id
-app.post(
-  "/tivoli/payout",
-  async (req: express.Request, res: express.Response) => {
-    const { transactionId, amount, ...rest } = req.body ?? {};
-    if (!transactionId || typeof amount !== "number")
-      return res
-        .status(400)
-        .json({ message: "transactionId and amount required" });
-
-    try {
-      const resp = await fetch(
-        `${CENTRALBANK_BASE_URL}/transactions/${encodeURIComponent(transactionId)}/payout`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount, api_key: AMUSEMENT_API_KEY, ...rest }),
-        },
-      );
-
-      const text = await resp.text();
-      const isJson = resp.headers
-        .get("content-type")
-        ?.includes("application/json");
-      if (!resp.ok)
-        return res
-          .status(resp.status)
-          .contentType(resp.headers.get("content-type") ?? "text/plain")
-          .send(text);
-      return isJson ? res.json(JSON.parse(text)) : res.send(text);
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ message: "Proxy error" });
-    }
-  },
-);
-
-// Mirror endpoints (optional)
-app.post(
-  "/tivoli/transactions",
-  async (req: express.Request, res: express.Response) => {
-    const body = req.body;
-    try {
-      const resp = await fetch(`${CENTRALBANK_BASE_URL}/transactions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...body, api_key: AMUSEMENT_API_KEY }),
-      });
-      const text = await resp.text();
-      const isJson = resp.headers
-        .get("content-type")
-        ?.includes("application/json");
-      if (!resp.ok)
-        return res
-          .status(resp.status)
-          .contentType(resp.headers.get("content-type") ?? "text/plain")
-          .send(text);
-      return isJson ? res.json(JSON.parse(text)) : res.send(text);
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ message: "Proxy error" });
-    }
-  },
-);
-
-app.post(
-  "/tivoli/transactions/:id/payout",
-  async (req: express.Request, res: express.Response) => {
-    const { id } = req.params as { id?: string };
-    try {
-      const resp = await fetch(
-        `${CENTRALBANK_BASE_URL}/transactions/${encodeURIComponent(id || "")}/payout`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...req.body, api_key: AMUSEMENT_API_KEY }),
-        },
-      );
-      const text = await resp.text();
-      const isJson = resp.headers
-        .get("content-type")
-        ?.includes("application/json");
-      if (!resp.ok)
-        return res
-          .status(resp.status)
-          .contentType(resp.headers.get("content-type") ?? "text/plain")
-          .send(text);
-      return isJson ? res.json(JSON.parse(text)) : res.send(text);
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ message: "Proxy error" });
-    }
-  },
-);
-
-app.get(
-  "/tivoli/identity-tokens/:token",
-  async (req: express.Request, res: express.Response) => {
-    const { token } = req.params as { token?: string };
-    try {
-      const resp = await fetch(
-        `${CENTRALBANK_BASE_URL}/identity-tokens/${encodeURIComponent(token || "")}?api_key=${encodeURIComponent(AMUSEMENT_API_KEY || "")}`,
-      );
-      const text = await resp.text();
-      const isJson = resp.headers
-        .get("content-type")
-        ?.includes("application/json");
-      if (!resp.ok)
-        return res
-          .status(resp.status)
-          .contentType(resp.headers.get("content-type") ?? "text/plain")
-          .send(text);
-      return isJson ? res.json(JSON.parse(text)) : res.send(text);
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ message: "Proxy error" });
-    }
-  },
 );
 
 /*
   GET TOP SCORES
 */
-app.get("/scores", async (req: express.Request, res: express.Response) => {
+app.get("/scores", async (_req: express.Request, res: express.Response) => {
   try {
-    const result = await pool.query(
-      `SELECT id, centralbank_user_id, player_name, score, created_at
-       FROM scores
-       ORDER BY score DESC, created_at ASC
-       LIMIT 10`,
-    );
-    res.json(result.rows);
-  } catch (error) {
-    console.error(error);
+    const { data, error } = await supabase
+      .from("scores")
+      .select("id, player_name, score, created_at")
+      .order("score", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    res.json(data || []);
+  } catch (err) {
+    console.error("Error fetching scores:", err);
     res.status(500).json({ message: "Database error" });
   }
 });
 
 /*
-  SAVE OR UPDATE HIGH SCORE
+  POST SCORE — no login required, name supplied at submit time.
+  Body: { playerName: string, score: number }
+  Each submission is a new row; we keep the player's personal best
+  by only updating if the new score beats their current best (matched by name).
 */
-
 app.post("/scores", async (req: express.Request, res: express.Response) => {
-  const { centralbankUserId, playerName, score } = req.body;
+  const { playerName, score } = req.body;
 
-  if (!centralbankUserId || !playerName || typeof score !== "number") {
+  if (!playerName || typeof score !== "number") {
     return res.status(400).json({
-      message: "centralbankUserId, playerName and score are required",
+      message: "playerName and score are required",
     });
   }
 
-  try {
-    const existingPlayer = await pool.query(
-      `SELECT id, score
-       FROM scores
-       WHERE centralbank_user_id = $1`,
-      [centralbankUserId],
-    );
+  const trimmedName = String(playerName).trim().slice(0, 32);
 
-    if (existingPlayer.rows.length === 0) {
-      const result = await pool.query(
-        `INSERT INTO scores (
-          centralbank_user_id,
-          player_name,
-          score
-        )
-        VALUES ($1, $2, $3)
-        RETURNING id, centralbank_user_id, player_name, score, created_at`,
-        [centralbankUserId, playerName, score],
-      );
+  if (!trimmedName) {
+    return res.status(400).json({ message: "playerName cannot be empty" });
+  }
+
+  try {
+    // Check if this name already has a score row
+    const { data: existing, error: fetchError } = await supabase
+      .from("scores")
+      .select("id, score")
+      .ilike("player_name", trimmedName)
+      .limit(1);
+
+    if (fetchError) {
+      console.error("Fetch error:", fetchError);
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    const existingRow = existing && existing.length > 0 ? existing[0] : null;
+
+    if (!existingRow) {
+      // First time this name appears — insert a new row
+      const { data: insertData, error: insertError } = await supabase
+        .from("scores")
+        .insert([
+          {
+            id: randomUUID(),
+            player_name: trimmedName,
+            score,
+          },
+        ])
+        .select("id, player_name, score, created_at");
+
+      if (insertError) {
+        console.error("Insert error:", JSON.stringify(insertError, null, 2));
+        return res
+          .status(500)
+          .json({ message: "Database error", details: insertError.message });
+      }
 
       return res.status(201).json({
-        message: "New player score saved",
-        score: result.rows[0],
+        message: "Score saved",
+        score: insertData?.[0],
       });
     }
 
-    const currentHighScore = existingPlayer.rows[0].score;
+    // Name exists — only update if new score is higher
+    if (score > existingRow.score) {
+      const { data: updateData, error: updateError } = await supabase
+        .from("scores")
+        .update({ score, created_at: new Date().toISOString() })
+        .eq("id", existingRow.id)
+        .select("id, player_name, score, created_at");
 
-    if (score > currentHighScore) {
-      const result = await pool.query(
-        `UPDATE scores
-         SET score = $1,
-             player_name = $2,
-             created_at = now()
-         WHERE centralbank_user_id = $3
-         RETURNING id, centralbank_user_id, player_name, score, created_at`,
-        [score, playerName, centralbankUserId],
-      );
+      if (updateError) {
+        console.error("Update error:", updateError);
+        return res.status(500).json({ message: "Database error" });
+      }
 
       return res.json({
         message: "High score updated",
-        score: result.rows[0],
+        score: updateData?.[0],
       });
     }
 
     return res.json({
-      message: "Score was not higher than current high score",
-      score: existingPlayer.rows[0],
+      message: "Score not higher than existing best",
+      score: existingRow,
     });
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: "Database error",
-    });
+  } catch (err) {
+    console.error("Error saving score:", err);
+    res.status(500).json({ message: "Database error" });
   }
 });
 

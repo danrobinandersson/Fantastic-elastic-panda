@@ -4,7 +4,7 @@ import Modal from "./Modal";
 import styles from "./ScoreboardModal.module.css";
 
 type Score = {
-  centralbank_user_id: string;
+  id: string;
   player_name: string;
   score: number;
   created_at: string;
@@ -14,7 +14,8 @@ type ScoreboardModalProps = {
   onClose: () => void;
 };
 
-const SCOREBOARD_API_URL = import.meta.env.VITE_SCOREBOARD_API_URL;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export default function ScoreboardModal({ onClose }: ScoreboardModalProps) {
   const [scores, setScores] = useState<Score[]>([]);
@@ -23,8 +24,22 @@ export default function ScoreboardModal({ onClose }: ScoreboardModalProps) {
   useEffect(() => {
     async function loadScores() {
       try {
-        const response = await fetch(`${SCOREBOARD_API_URL}/scores`);
-        if (!response.ok) throw new Error("Failed to load scores");
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/scores?select=id,player_name,score,created_at&order=score.desc&limit=10`,
+          {
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            },
+          },
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error("Failed to load scores:", response.status, errorData);
+          throw new Error("Failed to load scores");
+        }
+
         const data = await response.json();
         setScores(data);
       } catch (error) {
@@ -39,32 +54,29 @@ export default function ScoreboardModal({ onClose }: ScoreboardModalProps) {
 
   return (
     <Modal onExit={onClose} labelId="scoreboard-title">
-
-      {/* Title — reuses Modal.module.css h2 styles */}
       <h2 id="scoreboard-title">Scoreboard</h2>
 
-      {/* ── Score list ── */}
       <div className={styles.listWrapper}>
         {loading ? (
           <p className={styles.empty}>Loading…</p>
         ) : scores.length === 0 ? (
           <p className={styles.empty}>No scores yet. Be the first!</p>
         ) : (
-          scores.slice(0, 10).map((entry, index) => (
-            <div key={entry.centralbank_user_id} className={styles.scoreRow}>
+          scores.map((entry, index) => (
+            <div key={entry.id} className={styles.scoreRow}>
               <span className={styles.rank}>{index + 1}</span>
               <span className={styles.name}>{entry.player_name}</span>
-              <span className={styles.score}>{Number(entry.score).toFixed(2)}</span>
+              <span className={styles.score}>
+                {Number(entry.score).toFixed(2)}
+              </span>
             </div>
           ))
         )}
       </div>
 
-      {/* ── Controls ── */}
       <div className={styles.controls}>
         <Button onClick={onClose}>Close</Button>
       </div>
-
     </Modal>
   );
 }

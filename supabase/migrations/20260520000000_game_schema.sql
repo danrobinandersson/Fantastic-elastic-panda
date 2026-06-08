@@ -3,7 +3,7 @@
 -- Users (extended with game metadata)
 CREATE TABLE IF NOT EXISTS game_users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  centralbank_user_id INTEGER UNIQUE,
+  identity_token_hash TEXT UNIQUE,
   name TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS game_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES game_users(id) ON DELETE CASCADE,
   identity_token TEXT UNIQUE NOT NULL,
-  tivoli_transaction_id INTEGER,
   game_state TEXT NOT NULL DEFAULT 'pending', -- pending, in_progress, completed, failed
   player_blendshapes JSONB,
   target_blendshapes JSONB,
@@ -41,7 +40,7 @@ CREATE TABLE IF NOT EXISTS payout_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   session_id UUID NOT NULL REFERENCES game_sessions(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES game_users(id) ON DELETE CASCADE,
-  tivoli_transaction_id INTEGER NOT NULL,
+  -- No external transaction id in no-payment mode
   amount NUMERIC NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending', -- pending, success, failed
   error_message TEXT,
@@ -53,7 +52,7 @@ CREATE TABLE IF NOT EXISTS payout_history (
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_game_sessions_user_id ON game_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_game_sessions_identity_token ON game_sessions(identity_token);
-CREATE INDEX IF NOT EXISTS idx_game_sessions_tivoli_transaction_id ON game_sessions(tivoli_transaction_id);
+-- no tivoli transaction index (removed)
 CREATE INDEX IF NOT EXISTS idx_rate_limit_log_user_id ON rate_limit_log(user_id, request_type, created_at);
 CREATE INDEX IF NOT EXISTS idx_payout_history_user_id ON payout_history(user_id);
 CREATE INDEX IF NOT EXISTS idx_payout_history_status ON payout_history(status);
